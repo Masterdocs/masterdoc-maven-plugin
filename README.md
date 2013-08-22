@@ -4,8 +4,8 @@ masterdoc-maven-plugin
 Plugin Maven to generate documentation for JAX-RS API
 
 
-Use with : 
-
+Just add in your <i>pom.xml</i> with : 
+```
 <plugin>
     <groupId>com.masterdoc</groupId>
     <artifactId>masterdoc-maven-plugin</artifactId>
