@@ -18,4 +18,7 @@ Just add in your <i>pom.xml</i> with :
       </goals>
      </execution>
     </executions>
+    <configuration>
+      <packageDocumentationResource>com.masterdoc</packageDocumentationResource>
+    </configuration>
 </plugin>
