@@ -6,7 +6,19 @@
 	<artifactId>masterdoc-maven-plugin</artifactId>
 	<version>1.0-SNAPSHOT</version>
 	<packaging>maven-plugin</packaging>
+	<developers>
+		<developer>
+			<id>pleresteux</id>
+			<name>Pierre LERESTEUX</name>
+			<email>pierre.leresteux@gmail.com</email>
+			<url>https://github.com/pierreLeresteux</url>
+		</developer>
 
+		<developer>
+			<id>nlenouvel</id>
+			<name>Nicolas LENOUVEL</name>
+		</developer>
+	</developers>
 	<name>Masterdoc plugin</name>
 	<description>Generate the REST documentation</description>
 
