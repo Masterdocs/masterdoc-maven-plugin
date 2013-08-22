@@ -19,6 +19,9 @@ Just add in your <i>pom.xml</i> with :
      </execution>
     </executions>
     <configuration>
-      <packageDocumentationResource>com.masterdoc</packageDocumentationResource>
+      <packageDocumentationResources>
+          <param>com.masterdoc</param>
+          <param>...</param>
+      </packageDocumentationResources>
     </configuration>
 </plugin>

@@ -2,6 +2,7 @@
 .project
 .classpath
 target
+bin
 .settings
 # Package Files #
 *.jar
