@@ -66,6 +66,7 @@ public class GenerateDocListener {
   private Set<Serializable>    entityList;
   private MavenProject         project;
   private ClassLoader          originalClassLoader = Thread.currentThread().getContextClassLoader();
+  private ClassLoader          newClassLoader;
 
   // ----------------------------------------------------------------------
   // Variables
@@ -112,7 +113,8 @@ public class GenerateDocListener {
 
     consoleLogger.debug("urls = \n" + urls.toString().replace(",", "\n"));
 
-    Thread.currentThread().setContextClassLoader(new URLClassLoader(urls.toArray(new URL[urls.size()]), originalClassLoader));
+    newClassLoader = new URLClassLoader(urls.toArray(new URL[urls.size()]), originalClassLoader);
+    Thread.currentThread().setContextClassLoader(newClassLoader);
     // ////////////////////
     for (String packageDocumentationResource : packageDocumentationResources) {
       consoleLogger.info("Generate REST documentation on package " + packageDocumentationResource + "...");
@@ -188,7 +190,7 @@ public class GenerateDocListener {
       Serializable entity = iterator.next();
       final Class<?> entityClass;
       try {
-        entityClass = Class.forName(entity.toString());
+        entityClass = Class.forName(entity.toString(), true, newClassLoader);
       } catch (Exception e) {
         consoleLogger.info(entity.toString() + " is not forNamable");
         continue;
@@ -220,7 +222,7 @@ public class GenerateDocListener {
       IntrospectionException {
     final Class<?> entityClass;
     try {
-      entityClass = Class.forName(entity.toString());
+      entityClass = Class.forName(entity.toString(), true, newClassLoader);
     } catch (Exception e) {
       consoleLogger.info(entity.toString() + " is not forNamable");
       return null;
@@ -243,7 +245,7 @@ public class GenerateDocListener {
   private Map<String, AbstractEntity> extractFields(Serializable entity)
       throws ClassNotFoundException, IntrospectionException {
     Map<String, AbstractEntity> fields = new HashMap<String, AbstractEntity>();
-    final Class<?> entityClass = Class.forName(entity.toString());
+    final Class<?> entityClass = Class.forName(entity.toString(), true, newClassLoader);
     consoleLogger
         .info(">>Extract fields for class " + entityClass + " ...");
     final java.lang.reflect.Field[] declaredFields = entityClass
@@ -260,8 +262,8 @@ public class GenerateDocListener {
         field.setName(type);
         final Class<?> currEntityClass;
         try {
-          currEntityClass = Class.forName(type);
-          field.setEnumeration(Class.forName(type).isEnum());
+          currEntityClass = Class.forName(type, true, newClassLoader);
+          field.setEnumeration(currEntityClass.isEnum());
         } catch (Exception e) {
           consoleLogger
               .info(entity.toString() + " is not forNamable");
@@ -287,8 +289,8 @@ public class GenerateDocListener {
           field.setName(declaredField.getName());
           final Class<?> currEntityClass;
           try {
-            currEntityClass = Class.forName(type);
-            field.setEnumeration(Class.forName(type).isEnum());
+            currEntityClass = Class.forName(type, true, newClassLoader);
+            field.setEnumeration(currEntityClass.isEnum());
           } catch (Exception e2) {
             consoleLogger.info(entity.toString()
                 + " is not forNamable");
@@ -336,7 +338,7 @@ public class GenerateDocListener {
           + CLASS.length());
     }
     consoleLogger.info(">>>Extract enum " + entityString + " ...");
-    final Class<?> entityClass = Class.forName(entityString);
+    final Class<?> entityClass = Class.forName(entityString, true, newClassLoader);
     final Object[] declaredEnumConstants = entityClass.getEnumConstants();
     Enumeration newEnumeration = new Enumeration();
     newEnumeration.setName(entityString);
