@@ -1,10 +1,10 @@
 package com.masterdoc.pojo;
 
-import static javax.ws.rs.core.MediaType.WILDCARD;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+
+import static javax.ws.rs.core.MediaType.WILDCARD;
 
 /**
  * User: pleresteux
@@ -20,7 +20,6 @@ public class ResourceEntry implements Serializable {
   private String                 mediaTypeProduces;
   private CamelConsumeAnnotation CamelConsume;
   private String                 fullPath;
-  private boolean                async;
 
   public ResourceEntry() {
     this(WILDCARD, WILDCARD);
@@ -31,7 +30,6 @@ public class ResourceEntry implements Serializable {
     this.mediaTypeProduces = mediaTypeProduces;
     this.pathParams = new ArrayList<Param>();
     this.queryParams = new ArrayList<Param>();
-    this.async = false;
   }
 
   public String getVerb() {
@@ -112,14 +110,6 @@ public class ResourceEntry implements Serializable {
 
   public String getFullPath() {
     return fullPath;
-  }
-
-  public void setAsync(boolean async) {
-    this.async = async;
-  }
-
-  public boolean isAsync() {
-    return async;
   }
 
   public String calculateUniqKey() {
