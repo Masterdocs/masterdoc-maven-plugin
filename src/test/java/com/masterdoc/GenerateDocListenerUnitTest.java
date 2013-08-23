@@ -11,13 +11,13 @@ import org.reflections.util.ClasspathHelper;
 import org.reflections.util.ConfigurationBuilder;
 import org.reflections.util.FilterBuilder;
 
-import com.masterdoc.listener.GenerateDocListener;
+import com.masterdoc.plugin.MasterDocGenerator;
 
 public class GenerateDocListenerUnitTest {
 
 	@Test
 	public void should_generate_doc() {
-		// new GenerateDocListener("com.masterdoc");
+		// new MasterDocGenerator("com.masterdoc");
 
 		List<ClassLoader> classLoadersList = new LinkedList<ClassLoader>();
 		classLoadersList.add(ClasspathHelper.contextClassLoader());

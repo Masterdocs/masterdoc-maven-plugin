@@ -1,4 +1,4 @@
-package com.masterdoc.listener;
+package com.masterdoc.plugin;
 
 import static org.springframework.util.StringUtils.capitalize;
 
@@ -54,7 +54,7 @@ import com.masterdoc.pojo.Param;
 import com.masterdoc.pojo.Resource;
 import com.masterdoc.pojo.ResourceEntry;
 
-public class GenerateDocListener {
+public class MasterDocGenerator {
 
   // ----------------------------------------------------------------------
   // Constants
@@ -79,12 +79,12 @@ public class GenerateDocListener {
   // Constructors
   // ----------------------------------------------------------------------
 
-  public GenerateDocListener(MavenProject project, String pathToGenerateFile, String[] packageDocumentationResources)
+  public MasterDocGenerator(MavenProject project, String pathToGenerateFile, String[] packageDocumentationResources)
       throws SecurityException,
       NoSuchFieldException,
       IllegalArgumentException, IllegalAccessException {
     long start = System.currentTimeMillis();
-    consoleLogger.info("GenerateDocListener started");
+    consoleLogger.info("MasterDocGenerator started");
     resources = new ArrayList<Resource>();
     entities = new ArrayList<AbstractEntity>();
     entityList = new HashSet<Serializable>();
