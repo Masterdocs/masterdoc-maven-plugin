@@ -7,7 +7,6 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
 
-
 /**
  * masterdoc goal entry.
  * 
@@ -25,7 +24,7 @@ public class MasterDocPlugin extends AbstractMojo {
   /**
    * Path where to generate documentation.
    */
-  @Parameter(property = "pathToGenerateFile", readonly = true, required = true)
+  @Parameter(property = "pathToGenerateFile", readonly = true, required = false, defaultValue = "${project.reporting.outputDirectory}")
   private String       pathToGenerateFile;
 
   /**

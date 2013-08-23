@@ -16,7 +16,9 @@ import java.lang.reflect.Type;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -50,6 +52,8 @@ import com.masterdoc.pojo.AbstractEntity;
 import com.masterdoc.pojo.CamelConsumeAnnotation;
 import com.masterdoc.pojo.Entity;
 import com.masterdoc.pojo.Enumeration;
+import com.masterdoc.pojo.MasterDoc;
+import com.masterdoc.pojo.MasterDocMetadata;
 import com.masterdoc.pojo.Param;
 import com.masterdoc.pojo.Resource;
 import com.masterdoc.pojo.ResourceEntry;
@@ -60,20 +64,29 @@ public class MasterDocGenerator {
   // Constants
   // ----------------------------------------------------------------------
 
-  public static final String   CLASS               = "class ";
+  public static final String           CLASS               = "class ";
+  public static final SimpleDateFormat SDF                 = new SimpleDateFormat("dd-MM-yyyy HH:mm:sss");
 
   // ----------------------------------------------------------------------
   // Variables
   // ----------------------------------------------------------------------
 
-  private ConsoleLogger        consoleLogger       = new ConsoleLogger();
-  private List<Resource>       resources;
-  private List<AbstractEntity> entities;
-  private Set<Serializable>    entityList;
-  private MavenProject         project;
-  private ClassLoader          originalClassLoader = Thread.currentThread().getContextClassLoader();
-  private ClassLoader          newClassLoader;
-  private String               pathToGenerateFile;
+  /** Logger for maven plugin. */
+  private ConsoleLogger                consoleLogger       = new ConsoleLogger();
+  /** Resources found by MasterDoc. */
+  private List<Resource>               resources;
+  /** Entities found by MasterDoc. */
+  private List<AbstractEntity>         entities;
+  /** Metadata found by MasterDoc. */
+  private MasterDocMetadata            metadata;
+  /** Final MasterDoc. */
+  private MasterDoc                    masterDoc;
+
+  private Set<Serializable>            entityList;
+  private MavenProject                 project;
+  private ClassLoader                  originalClassLoader = Thread.currentThread().getContextClassLoader();
+  private ClassLoader                  newClassLoader;
+  private String                       pathToGenerateFile;
 
   // ----------------------------------------------------------------------
   // Constructors
@@ -116,6 +129,7 @@ public class MasterDocGenerator {
       try {
         getDocResource(packageDocumentationResource);
         getEntities();
+        getMetadata();
       } catch (NoSuchMethodException e) {
         e.printStackTrace(); // To change body of catch statement use
         // File | Settings | File Templates.
@@ -159,6 +173,104 @@ public class MasterDocGenerator {
         entities.add(newEntity);
       }
     }
+  }
+
+  /**
+   * Get all @Path class and export all methods
+   * 
+   * @throws NoSuchFieldException
+   * @throws SecurityException
+   */
+
+  private void getDocResource(String packageDocumentationResource) throws NoSuchMethodException {
+    String mediaTypeProduces = null, mediaTypeConsumes = null;
+
+    Reflections reflections = new Reflections(packageDocumentationResource);
+    Set<Class<?>> reflectionResources = reflections
+        .getTypesAnnotatedWith(Path.class);
+    // Set<String> serializables = reflections.getStore().getSubTypesOf("java.io.Serializable");
+    consoleLogger.info("Ressources : " + reflectionResources);
+    // consoleLogger.info("Possibles Dto(s) : " + serializables);
+    for (Iterator<Class<?>> iterator = reflectionResources.iterator(); iterator
+        .hasNext();) {
+      Class<?> resource = iterator.next();
+      if (!resource.isInterface()) {
+        Resource res = new Resource();
+
+        Annotation[] annotations = resource.getAnnotations();
+        Method[] declaredMethods = resource.getDeclaredMethods();
+
+        res.setEntryList(new TreeMap<String, ResourceEntry>());
+        // Annotations for resource
+        for (int i = 0; i < annotations.length; i++) {
+          Annotation annotation = annotations[i];
+          if (annotation instanceof Path) {
+            res.setRootPath(((Path) annotation).value());
+          }
+          if (annotation instanceof Produces) {
+            mediaTypeProduces = ((Produces) annotation).value()[0];
+          }
+          if (annotation instanceof Consumes) {
+            mediaTypeConsumes = ((Consumes) annotation).value()[0];
+          }
+        }
+
+        // Check methods
+        Class<?> superclass = resource.getSuperclass();
+        if (null != superclass
+            && !superclass.getCanonicalName().equals(
+                "java.lang.Object")) {
+          Method[] superclassDeclaredMethods = superclass
+              .getDeclaredMethods();
+          for (int i = 0; i < superclassDeclaredMethods.length; i++) {
+            Method superclassDeclaredMethod = superclassDeclaredMethods[i];
+            ResourceEntry resourceEntry = createResourceEntryFromMethod(
+                superclassDeclaredMethod, mediaTypeConsumes,
+                mediaTypeProduces, resource);
+            if (null != resourceEntry) {
+              resourceEntry.setFullPath(res.getRootPath() + "/"
+                  + resourceEntry.getPath());
+              res.getEntryList().put(
+                  resourceEntry.calculateUniqKey(),
+                  resourceEntry);
+            }
+          }
+        }
+        for (int i = 0; i < declaredMethods.length; i++) {
+          Method declaredMethod = declaredMethods[i];
+          ResourceEntry resourceEntry = createResourceEntryFromMethod(
+              declaredMethod, mediaTypeConsumes,
+              mediaTypeProduces, null);
+          if (null != resourceEntry) {
+            if (res.getEntryList().containsKey(
+                resourceEntry.calculateUniqKey())) {
+              res.getEntryList().remove(
+                  resourceEntry.calculateUniqKey());
+            }
+            resourceEntry.setFullPath(res.getRootPath() + "/"
+                + resourceEntry.getPath());
+            res.getEntryList()
+                .put(resourceEntry.calculateUniqKey(),
+                    resourceEntry);
+          }
+        }
+
+        consoleLogger.info(">> " + resource.getCanonicalName());
+        resources.add(res);
+        extractEntityFromResourceEntries(res);
+      } else {
+        consoleLogger.info(">>skip " + resource.getCanonicalName());
+      }
+    }
+  }
+
+  private void getMetadata() {
+    metadata = new MasterDocMetadata();
+    metadata.setGenerationDate(SDF.format(new Date()));
+    metadata.setGroupId(project.getGroupId());
+    metadata.setArtifactId(project.getArtifactId());
+    metadata.setVersion(project.getVersion());
+
   }
 
   /**
@@ -303,96 +415,6 @@ public class MasterDocGenerator {
       entities.add(newEnumeration);
     }
     return fields;
-  }
-
-  /**
-   * Get all @Path class and export all methods
-   * 
-   * @throws NoSuchFieldException
-   * @throws SecurityException
-   */
-
-  private void getDocResource(String packageDocumentationResource) throws NoSuchMethodException {
-    String mediaTypeProduces = null, mediaTypeConsumes = null;
-
-    Reflections reflections = new Reflections(packageDocumentationResource);
-    Set<Class<?>> reflectionResources = reflections
-        .getTypesAnnotatedWith(Path.class);
-    Set<String> serializables = reflections.getStore().getSubTypesOf(
-        "java.io.Serializable");
-    consoleLogger.info("Ressources : " + reflectionResources);
-    consoleLogger.info("Possibles Dto(s) : " + serializables);
-    for (Iterator<Class<?>> iterator = reflectionResources.iterator(); iterator
-        .hasNext();) {
-      Class<?> resource = iterator.next();
-      if (!resource.isInterface()) {
-        Resource res = new Resource();
-
-        Annotation[] annotations = resource.getAnnotations();
-        Method[] declaredMethods = resource.getDeclaredMethods();
-
-        res.setEntryList(new TreeMap<String, ResourceEntry>());
-        // Annotations for resource
-        for (int i = 0; i < annotations.length; i++) {
-          Annotation annotation = annotations[i];
-          if (annotation instanceof Path) {
-            res.setRootPath(((Path) annotation).value());
-          }
-          if (annotation instanceof Produces) {
-            mediaTypeProduces = ((Produces) annotation).value()[0];
-          }
-          if (annotation instanceof Consumes) {
-            mediaTypeConsumes = ((Consumes) annotation).value()[0];
-          }
-        }
-
-        // Check methods
-        Class<?> superclass = resource.getSuperclass();
-        if (null != superclass
-            && !superclass.getCanonicalName().equals(
-                "java.lang.Object")) {
-          Method[] superclassDeclaredMethods = superclass
-              .getDeclaredMethods();
-          for (int i = 0; i < superclassDeclaredMethods.length; i++) {
-            Method superclassDeclaredMethod = superclassDeclaredMethods[i];
-            ResourceEntry resourceEntry = createResourceEntryFromMethod(
-                superclassDeclaredMethod, mediaTypeConsumes,
-                mediaTypeProduces, resource);
-            if (null != resourceEntry) {
-              resourceEntry.setFullPath(res.getRootPath() + "/"
-                  + resourceEntry.getPath());
-              res.getEntryList().put(
-                  resourceEntry.calculateUniqKey(),
-                  resourceEntry);
-            }
-          }
-        }
-        for (int i = 0; i < declaredMethods.length; i++) {
-          Method declaredMethod = declaredMethods[i];
-          ResourceEntry resourceEntry = createResourceEntryFromMethod(
-              declaredMethod, mediaTypeConsumes,
-              mediaTypeProduces, null);
-          if (null != resourceEntry) {
-            if (res.getEntryList().containsKey(
-                resourceEntry.calculateUniqKey())) {
-              res.getEntryList().remove(
-                  resourceEntry.calculateUniqKey());
-            }
-            resourceEntry.setFullPath(res.getRootPath() + "/"
-                + resourceEntry.getPath());
-            res.getEntryList()
-                .put(resourceEntry.calculateUniqKey(),
-                    resourceEntry);
-          }
-        }
-
-        consoleLogger.info(">> " + resource.getCanonicalName());
-        resources.add(res);
-        extractEntityFromResourceEntries(res);
-      } else {
-        consoleLogger.info(">>skip " + resource.getCanonicalName());
-      }
-    }
   }
 
   private void extractEntityFromResourceEntries(Resource res) {
@@ -585,28 +607,25 @@ public class MasterDocGenerator {
    */
   private void generateDocumentationFile() {
     ObjectMapper mapper = new ObjectMapper();
-    // consoleLogger.info(mapper.defaultPrettyPrintingWriter()
-    // .writeValueAsString(resources));
-    // consoleLogger.info(mapper.defaultPrettyPrintingWriter()
-    // .writeValueAsString(entities));
+    MasterDoc masterDoc = new MasterDoc();
+    masterDoc.setEntities(entities);
+    masterDoc.setResources(resources);
+    masterDoc.setMetadata(metadata);
     consoleLogger.info("Generate files in " + pathToGenerateFile + "...");
-    try {
-      File fileEntities = new File(pathToGenerateFile + "/entities.txt");
-      BufferedWriter output = new BufferedWriter(new FileWriter(
-          fileEntities));
-      output.write(mapper.defaultPrettyPrintingWriter()
-          .writeValueAsString(entities));
-      output.close();
-    } catch (IOException e) {
-      e.printStackTrace();
+
+    pathToGenerateFile = pathToGenerateFile.replaceAll("/", "\\");
+    File theDir = new File(pathToGenerateFile);
+    // if the directory does not exist, create it
+    if (!theDir.exists()) {
+      boolean ret = theDir.mkdirs();
     }
 
     try {
-      File fileResources = new File(pathToGenerateFile + "/resources.txt");
+      File fileEntities = new File(pathToGenerateFile + "/masterdoc.json");
       BufferedWriter output = new BufferedWriter(new FileWriter(
-          fileResources));
+          fileEntities));
       output.write(mapper.defaultPrettyPrintingWriter()
-          .writeValueAsString(resources));
+          .writeValueAsString(masterDoc));
       output.close();
     } catch (IOException e) {
       e.printStackTrace();

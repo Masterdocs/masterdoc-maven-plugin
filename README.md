@@ -23,6 +23,5 @@ Just add in your <i>pom.xml</i> with :
           <param>com.masterdoc</param>
           <param>...</param>
       </packageDocumentationResources>
-      <pathToGenerateFile>/etc</pathToGenerateFile>
     </configuration>
 </plugin>
