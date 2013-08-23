@@ -589,6 +589,7 @@ public class GenerateDocListener {
     // .writeValueAsString(resources));
     // consoleLogger.info(mapper.defaultPrettyPrintingWriter()
     // .writeValueAsString(entities));
+    consoleLogger.info("Generate files in " + pathToGenerateFile + "...");
     try {
       File fileEntities = new File(pathToGenerateFile + "/entities.txt");
       BufferedWriter output = new BufferedWriter(new FileWriter(
@@ -611,5 +612,4 @@ public class GenerateDocListener {
       e.printStackTrace();
     }
   }
-
 }
