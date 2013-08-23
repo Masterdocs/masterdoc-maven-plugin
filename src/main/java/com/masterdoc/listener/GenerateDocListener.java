@@ -79,9 +79,11 @@ public class GenerateDocListener {
   // Constructors
   // ----------------------------------------------------------------------
 
-  public GenerateDocListener(MavenProject project, String pathToGenerateFile, String... packageDocumentationResources) throws SecurityException,
+  public GenerateDocListener(MavenProject project, String pathToGenerateFile, String[] packageDocumentationResources)
+      throws SecurityException,
       NoSuchFieldException,
       IllegalArgumentException, IllegalAccessException {
+    long start = System.currentTimeMillis();
     consoleLogger.info("GenerateDocListener started");
     resources = new ArrayList<Resource>();
     entities = new ArrayList<AbstractEntity>();
@@ -89,48 +91,23 @@ public class GenerateDocListener {
     this.project = project;
     this.pathToGenerateFile = pathToGenerateFile;
     // ////////////////////
-    List<URL> urls = new ArrayList<URL>();
-
-    // get all the dependencies which are hidden in resolvedArtifacts of project object
-    Field dependencies = MavenProject.class.
-        getDeclaredField("resolvedArtifacts");
-
-    dependencies.setAccessible(true);
-
-    LinkedHashSet<Artifact> artifacts = (LinkedHashSet<Artifact>) dependencies.get(project);
-
-    // noinspection unchecked
-    for (Artifact artifact : artifacts) {
-      try {
-        urls.add(artifact.getFile().toURI().toURL());
-      } catch (MalformedURLException e) {
-        // logger.error(e);
-      }
-    }
-
-    try {
-      urls.add(new File(project.getBuild().getOutputDirectory()).toURI().toURL());
-    } catch (MalformedURLException e) {
-      consoleLogger.error(e.getMessage());
-    }
-
-    consoleLogger.debug("urls = \n" + urls.toString().replace(",", "\n"));
-
-    newClassLoader = new URLClassLoader(urls.toArray(new URL[urls.size()]), originalClassLoader);
-    Thread.currentThread().setContextClassLoader(newClassLoader);
+    generateProjectClassLoader(project);
     // ////////////////////
     for (String packageDocumentationResource : packageDocumentationResources) {
       consoleLogger.info("Generate REST documentation on package " + packageDocumentationResource + "...");
       startGeneration(new String[] { packageDocumentationResource });
     }
+    //
+    generateDocumentationFile();
+    //
     // restore original classloader
     Thread.currentThread().setContextClassLoader(originalClassLoader);
+    consoleLogger.info("Generation ended in " + (System.currentTimeMillis() - start) + " ms");
   }
 
   // ----------------------------------------------------------------------
   // Public methods
   // ----------------------------------------------------------------------
-
   public void startGeneration(String[] args) {
     String packageDocumentationResource = args[0];
 
@@ -153,34 +130,6 @@ public class GenerateDocListener {
       consoleLogger
           .info("packageDocumentationResources not defined in plugin configuration");
     }
-
-    ObjectMapper mapper = new ObjectMapper();
-    // consoleLogger.info(mapper.defaultPrettyPrintingWriter()
-    // .writeValueAsString(resources));
-    // consoleLogger.info(mapper.defaultPrettyPrintingWriter()
-    // .writeValueAsString(entities));
-    try {
-      File fileEntities = new File(pathToGenerateFile + "/entities.txt");
-      BufferedWriter output = new BufferedWriter(new FileWriter(
-          fileEntities));
-      output.write(mapper.defaultPrettyPrintingWriter()
-          .writeValueAsString(entities));
-      output.close();
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
-
-    try {
-      File fileResources = new File(pathToGenerateFile + "/resources.txt");
-      BufferedWriter output = new BufferedWriter(new FileWriter(
-          fileResources));
-      output.write(mapper.defaultPrettyPrintingWriter()
-          .writeValueAsString(resources));
-      output.close();
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
-    int j;
   }
 
   // ----------------------------------------------------------------------
@@ -593,4 +542,74 @@ public class GenerateDocListener {
     }
     return returnType;
   }
+
+  /**
+   * @param project
+   * @throws NoSuchFieldException
+   * @throws IllegalAccessException
+   */
+  private void generateProjectClassLoader(MavenProject project) throws NoSuchFieldException, IllegalAccessException {
+    List<URL> urls = new ArrayList<URL>();
+
+    // get all the dependencies which are hidden in resolvedArtifacts of project object
+    Field dependencies = MavenProject.class.
+        getDeclaredField("resolvedArtifacts");
+
+    dependencies.setAccessible(true);
+
+    LinkedHashSet<Artifact> artifacts = (LinkedHashSet<Artifact>) dependencies.get(project);
+
+    // noinspection unchecked
+    for (Artifact artifact : artifacts) {
+      try {
+        urls.add(artifact.getFile().toURI().toURL());
+      } catch (MalformedURLException e) {
+        // logger.error(e);
+      }
+    }
+
+    try {
+      urls.add(new File(project.getBuild().getOutputDirectory()).toURI().toURL());
+    } catch (MalformedURLException e) {
+      consoleLogger.error(e.getMessage());
+    }
+
+    consoleLogger.debug("urls = \n" + urls.toString().replace(",", "\n"));
+
+    newClassLoader = new URLClassLoader(urls.toArray(new URL[urls.size()]), originalClassLoader);
+    Thread.currentThread().setContextClassLoader(newClassLoader);
+  }
+
+  /**
+   * 
+   */
+  private void generateDocumentationFile() {
+    ObjectMapper mapper = new ObjectMapper();
+    // consoleLogger.info(mapper.defaultPrettyPrintingWriter()
+    // .writeValueAsString(resources));
+    // consoleLogger.info(mapper.defaultPrettyPrintingWriter()
+    // .writeValueAsString(entities));
+    try {
+      File fileEntities = new File(pathToGenerateFile + "/entities.txt");
+      BufferedWriter output = new BufferedWriter(new FileWriter(
+          fileEntities));
+      output.write(mapper.defaultPrettyPrintingWriter()
+          .writeValueAsString(entities));
+      output.close();
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+
+    try {
+      File fileResources = new File(pathToGenerateFile + "/resources.txt");
+      BufferedWriter output = new BufferedWriter(new FileWriter(
+          fileResources));
+      output.write(mapper.defaultPrettyPrintingWriter()
+          .writeValueAsString(resources));
+      output.close();
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+  }
+
 }
