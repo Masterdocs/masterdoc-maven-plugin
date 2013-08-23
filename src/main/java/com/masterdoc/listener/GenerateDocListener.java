@@ -1,13 +1,18 @@
 package com.masterdoc.listener;
 
-import static org.springframework.util.StringUtils.capitalize;
+import com.googlecode.gentyref.GenericTypeReflector;
+import com.masterdoc.pojo.*;
+import com.masterdoc.pojo.Enumeration;
+import org.apache.camel.Consume;
+import org.apache.maven.artifact.Artifact;
+import org.apache.maven.project.MavenProject;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.plexus.logging.console.ConsoleLogger;
+import org.reflections.Reflections;
 
+import javax.ws.rs.*;
 import java.beans.IntrospectionException;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.Serializable;
+import java.io.*;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -16,43 +21,9 @@ import java.lang.reflect.Type;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
+import java.util.*;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.GET;
-import javax.ws.rs.OPTIONS;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-
-import org.apache.camel.Consume;
-import org.apache.maven.artifact.Artifact;
-import org.apache.maven.project.MavenProject;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.plexus.logging.console.ConsoleLogger;
-import org.reflections.Reflections;
-import org.springframework.scheduling.annotation.Async;
-
-import com.googlecode.gentyref.GenericTypeReflector;
-import com.masterdoc.pojo.AbstractEntity;
-import com.masterdoc.pojo.CamelConsumeAnnotation;
-import com.masterdoc.pojo.Entity;
-import com.masterdoc.pojo.Enumeration;
-import com.masterdoc.pojo.Param;
-import com.masterdoc.pojo.Resource;
-import com.masterdoc.pojo.ResourceEntry;
+import static org.springframework.util.StringUtils.capitalize;
 
 public class GenerateDocListener {
 
@@ -469,10 +440,6 @@ public class GenerateDocListener {
       if (declaredAnnotation instanceof OPTIONS) {
         resourceEntry.setVerb("OPTIONS");
       }
-      if (declaredAnnotation instanceof Async) {
-        resourceEntry.setAsync(true);
-      }
-
     }
 
     if (null == resourceEntry.getVerb()) {
