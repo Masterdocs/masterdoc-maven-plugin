@@ -1,8 +1,8 @@
-package com.masterdoc.listener.logo;
+package com.masterdoc.plugin;
 
 import org.codehaus.plexus.logging.console.ConsoleLogger;
 
-public class LogoGenerator {
+public class MasterDocLogoGenerator {
 
 	// ----------------------------------------------------------------------
 	// Variables
@@ -10,7 +10,7 @@ public class LogoGenerator {
 
 	private ConsoleLogger consoleLogger = new ConsoleLogger();
 
-	public LogoGenerator() {
+	public MasterDocLogoGenerator() {
 		consoleLogger
 				.info("MMMMM .          .MMMMM..                                            ..MMM  .                                              MMMMMMMMMMMMM$..");
 		consoleLogger

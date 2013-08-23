@@ -7,8 +7,6 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
 
-import com.masterdoc.listener.GenerateDocListener;
-import com.masterdoc.listener.logo.LogoGenerator;
 
 /**
  * masterdoc goal entry.
@@ -37,9 +35,9 @@ public class MasterDocPlugin extends AbstractMojo {
   private String[]     packageDocumentationResources;
 
   public void execute() throws MojoExecutionException {
-    new LogoGenerator();
+    new MasterDocLogoGenerator();
     try {
-      new GenerateDocListener(project, pathToGenerateFile, packageDocumentationResources);
+      new MasterDocGenerator(project, pathToGenerateFile, packageDocumentationResources);
     } catch (SecurityException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
