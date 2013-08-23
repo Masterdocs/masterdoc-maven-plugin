@@ -25,6 +25,12 @@ public class MasterDocPlugin extends AbstractMojo {
   private MavenProject project;
 
   /**
+   * Path where to generate documentation.
+   */
+  @Parameter(property = "pathToGenerateFile", readonly = true, required = true)
+  private String       pathToGenerateFile;
+
+  /**
    * Package where to find the classes annotated to generate documentation.
    */
   @Parameter(property = "packageDocumentationResources", readonly = true, required = true)
@@ -33,7 +39,7 @@ public class MasterDocPlugin extends AbstractMojo {
   public void execute() throws MojoExecutionException {
     new LogoGenerator();
     try {
-      new GenerateDocListener(project, packageDocumentationResources);
+      new GenerateDocListener(project, pathToGenerateFile, packageDocumentationResources);
     } catch (SecurityException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();

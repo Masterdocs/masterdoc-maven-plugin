@@ -61,30 +61,33 @@ public class GenerateDocListener {
   // ----------------------------------------------------------------------
 
   public static final String   CLASS               = "class ";
-  private List<Resource>       resources;
-  private List<AbstractEntity> entities;
-  private Set<Serializable>    entityList;
-  private MavenProject         project;
-  private ClassLoader          originalClassLoader = Thread.currentThread().getContextClassLoader();
-  private ClassLoader          newClassLoader;
 
   // ----------------------------------------------------------------------
   // Variables
   // ----------------------------------------------------------------------
 
   private ConsoleLogger        consoleLogger       = new ConsoleLogger();
+  private List<Resource>       resources;
+  private List<AbstractEntity> entities;
+  private Set<Serializable>    entityList;
+  private MavenProject         project;
+  private ClassLoader          originalClassLoader = Thread.currentThread().getContextClassLoader();
+  private ClassLoader          newClassLoader;
+  private String               pathToGenerateFile;
 
   // ----------------------------------------------------------------------
   // Constructors
   // ----------------------------------------------------------------------
 
-  public GenerateDocListener(MavenProject project, String... packageDocumentationResources) throws SecurityException, NoSuchFieldException,
+  public GenerateDocListener(MavenProject project, String pathToGenerateFile, String... packageDocumentationResources) throws SecurityException,
+      NoSuchFieldException,
       IllegalArgumentException, IllegalAccessException {
     consoleLogger.info("GenerateDocListener started");
     resources = new ArrayList<Resource>();
     entities = new ArrayList<AbstractEntity>();
     entityList = new HashSet<Serializable>();
     this.project = project;
+    this.pathToGenerateFile = pathToGenerateFile;
     // ////////////////////
     List<URL> urls = new ArrayList<URL>();
 
@@ -157,7 +160,7 @@ public class GenerateDocListener {
     // consoleLogger.info(mapper.defaultPrettyPrintingWriter()
     // .writeValueAsString(entities));
     try {
-      File fileEntities = new File("/etc/entities.txt");
+      File fileEntities = new File(pathToGenerateFile + "/entities.txt");
       BufferedWriter output = new BufferedWriter(new FileWriter(
           fileEntities));
       output.write(mapper.defaultPrettyPrintingWriter()
@@ -168,7 +171,7 @@ public class GenerateDocListener {
     }
 
     try {
-      File fileResources = new File("/etc/resources.txt");
+      File fileResources = new File(pathToGenerateFile + "/resources.txt");
       BufferedWriter output = new BufferedWriter(new FileWriter(
           fileResources));
       output.write(mapper.defaultPrettyPrintingWriter()

@@ -19,6 +19,7 @@
 			<name>Nicolas LENOUVEL</name>
 		</developer>
 	</developers>
+
 	<name>Masterdoc plugin</name>
 	<description>Generate the REST documentation</description>
 
@@ -54,7 +55,7 @@
 			<artifactId>plexus-utils</artifactId>
 			<version>3.0.1</version>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>org.apache.maven</groupId>
 			<artifactId>maven-core</artifactId>
