@@ -25,3 +25,6 @@ Just add in your <i>pom.xml</i> with :
       </packageDocumentationResources>
     </configuration>
 </plugin>
+
+
+This plugin generate a JSON file containing some metadatas (build date, groupId, artifactId and version of the project), all the services exposed with JAX-RS annotations and all the entities used by all services.
