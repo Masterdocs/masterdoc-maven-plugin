@@ -132,8 +132,7 @@ public class MasterDocGenerator {
       newEntity.setName(entity.toString());
 
       if (entityClass.isEnum()) {
-        newEntity.setEnumeration(true);
-        newEntity.setFields(extractEnumFields(entity));
+        extractEnumFields(entity);
       } else {
         newEntity.setFields(extractFields(entity));
         entities.add(newEntity);
@@ -276,35 +275,35 @@ public class MasterDocGenerator {
       throws ClassNotFoundException, IntrospectionException {
     Map<String, AbstractEntity> fields = new HashMap<String, AbstractEntity>();
     final Class<?> entityClass = Class.forName(entity.toString(), true, newClassLoader);
-    consoleLogger
-        .info(">>Extract fields for class " + entityClass + " ...");
+    consoleLogger.info(">>Extract fields for class " + entityClass + " ...");
     final java.lang.reflect.Field[] declaredFields = entityClass
         .getDeclaredFields();
     for (int i = 0; i < declaredFields.length; i++) {
       java.lang.reflect.Field declaredField = declaredFields[i];
-      consoleLogger.info(">>>Extract field " + declaredField.getName()
-          + " ...");
+      consoleLogger.info(">>>Extract field " + declaredField.getName() + " ...");
       final String type = extractTypeFromType(declaredField.getType());
       try {
-        entityClass.getDeclaredMethod("get"
-            + capitalize(declaredField.getName())); // GET OR IS
-        Entity field = new Entity();
-        field.setName(type);
+        entityClass.getDeclaredMethod("get" + capitalize(declaredField.getName())); // GET OR IS
         final Class<?> currEntityClass;
         try {
           currEntityClass = Class.forName(type, true, newClassLoader);
-          field.setEnumeration(currEntityClass.isEnum());
         } catch (Exception e) {
-          consoleLogger
-              .info(entity.toString() + " is not forNamable");
+          consoleLogger.info(entity.toString() + " is not forNamable");
           continue;
+        }
+        AbstractEntity field;
+        if (currEntityClass.isEnum()) {
+          field = new Enumeration();
+          field.setName(type);
+        } else {
+          field = new Entity();
+          field.setName(type);
         }
         fields.put(declaredField.getName(), field);
         if (!entityList.contains(type)) {
           Entity newEntity = new Entity();
           newEntity.setName(field.getName());
           newEntity.setFields(extractFieldsSwitcher(type));
-          newEntity.setEnumeration(currEntityClass.isEnum());
           // enum are added as enumeration object in enumeration
           // extract field method (do not add them as entity again)
           if (!currEntityClass.isEnum()) {
@@ -320,7 +319,6 @@ public class MasterDocGenerator {
           final Class<?> currEntityClass;
           try {
             currEntityClass = Class.forName(type, true, newClassLoader);
-            field.setEnumeration(currEntityClass.isEnum());
           } catch (Exception e2) {
             consoleLogger.info(entity.toString()
                 + " is not forNamable");
@@ -328,10 +326,13 @@ public class MasterDocGenerator {
           }
           fields.put(declaredField.getName(), field);
           if (!entityList.contains(type)) {
+            if (currEntityClass.isEnum()) {
+              Enumeration newEnum = new Enumeration();
+              newEnum.setName(field.getName());
+            }
             Entity newEntity = new Entity();
             newEntity.setName(field.getName());
             newEntity.setFields(extractFieldsSwitcher(type));
-            newEntity.setEnumeration(currEntityClass.isEnum());
             // enum are added as enumeration object in enumeration
             // extract field method (do not add them as entity
             // again)
@@ -568,7 +569,8 @@ public class MasterDocGenerator {
    * 
    */
   private void generateDocumentationFile() {
-    ObjectMapper mapper = new ObjectMapper();
+    JacksonJsonProvider jsonProvider = new JacksonJsonProvider();
+    ObjectMapper mapper = jsonProvider.getObjectMapper();
     MasterDoc masterDoc = new MasterDoc();
     masterDoc.setEntities(entities);
     masterDoc.setResources(resources);
