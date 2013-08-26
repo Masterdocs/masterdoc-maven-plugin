@@ -1,10 +1,11 @@
 package com.masterdoc.plugin;
 
+import static org.apache.maven.plugins.annotations.ResolutionScope.COMPILE;
+
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
-import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
 
 /**
@@ -12,7 +13,7 @@ import org.apache.maven.project.MavenProject;
  * 
  * @author nlenouvel
  */
-@Mojo(name = "masterdoc", requiresDependencyResolution = ResolutionScope.COMPILE)
+@Mojo(name = "masterdoc", requiresDependencyResolution = COMPILE)
 public class MasterDocPlugin extends AbstractMojo {
 
   /**
@@ -20,13 +21,11 @@ public class MasterDocPlugin extends AbstractMojo {
    */
   @Parameter(defaultValue = "${project}", readonly = true, required = true)
   private MavenProject project;
-
   /**
    * Path where to generate documentation.
    */
   @Parameter(property = "pathToGenerateFile", readonly = true, required = false, defaultValue = "${project.reporting.outputDirectory}")
   private String       pathToGenerateFile;
-
   /**
    * Package where to find the classes annotated to generate documentation.
    */
