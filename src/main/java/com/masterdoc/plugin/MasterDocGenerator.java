@@ -1,13 +1,19 @@
 package com.masterdoc.plugin;
 
+import static java.io.File.separator;
+import static java.text.MessageFormat.format;
 import static org.springframework.util.StringUtils.capitalize;
 
 import java.beans.IntrospectionException;
 import java.io.*;
 import java.lang.annotation.Annotation;
-import java.lang.reflect.*;
 import java.lang.reflect.Field;
-import java.net.*;
+import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -30,15 +36,30 @@ public class MasterDocGenerator {
   // Constants
   // ----------------------------------------------------------------------
 
-  public static final String           CLASS               = "class ";
-  public static final SimpleDateFormat SDF                 = new SimpleDateFormat("dd-MM-yyyy HH:mm:sss");
+  public static final String           CLASS                   = "class ";
+  public static final SimpleDateFormat SDF                     = new SimpleDateFormat("dd-MM-yyyy HH:mm:sss");
+  public static final String           MASTERDOC_JSON_FILENAME = "masterdoc.json";
+  public static final String           PATH_PARAM              = "PathParam";
+  public static final String           QUERY_PARAM             = "QueryParam";
+  public static final String           JAVA_UTIL_HASH_MAP      = "java.util.HashMap";
+  public static final String           GET                     = "GET";
+  public static final String           POST                    = "POST";
+  public static final String           PUT                     = "PUT";
+  public static final String           DELETE                  = "DELETE";
+  public static final String           OPTIONS                 = "OPTIONS";
+  public static final String           NULL                    = "null";
+  public static final String           VOID                    = "void";
+  public static final String           IS_PREFIX               = "is";
+  public static final String           GET_PREFIX              = "get";
+  public static final String           INTERFACE               = "interface";
+  public static final String           T                       = "T";
+  public static final String           JAVA_LANG_OBJECT        = "java.lang.Object";
 
   // ----------------------------------------------------------------------
   // Variables
   // ----------------------------------------------------------------------
-
   /** Logger for maven plugin. */
-  private ConsoleLogger                consoleLogger       = new ConsoleLogger();
+  private ConsoleLogger                consoleLogger           = new ConsoleLogger();
   /** Resources found by MasterDoc. */
   private List<Resource>               resources;
   /** Entities found by MasterDoc. */
@@ -47,10 +68,9 @@ public class MasterDocGenerator {
   private MasterDocMetadata            metadata;
   /** Final MasterDoc. */
   private MasterDoc                    masterDoc;
-
   private Set<Serializable>            entityList;
   private MavenProject                 project;
-  private ClassLoader                  originalClassLoader = Thread.currentThread().getContextClassLoader();
+  private ClassLoader                  originalClassLoader     = Thread.currentThread().getContextClassLoader();
   private ClassLoader                  newClassLoader;
   private String                       pathToGenerateFile;
 
@@ -73,7 +93,7 @@ public class MasterDocGenerator {
     generateProjectClassLoader(project);
     // ////////////////////
     for (String packageDocumentationResource : packageDocumentationResources) {
-      consoleLogger.info("Generate REST documentation on package " + packageDocumentationResource + "...");
+      consoleLogger.info(format("Generate REST documentation on package {0} ...", packageDocumentationResource));
       startGeneration(new String[] { packageDocumentationResource });
     }
     //
@@ -81,7 +101,7 @@ public class MasterDocGenerator {
     //
     // restore original classloader
     Thread.currentThread().setContextClassLoader(originalClassLoader);
-    consoleLogger.info("Generation ended in " + (System.currentTimeMillis() - start) + " ms");
+    consoleLogger.info(format("Generation ended in {0} ms", (System.currentTimeMillis() - start)));
   }
 
   // ----------------------------------------------------------------------
@@ -97,18 +117,14 @@ public class MasterDocGenerator {
         getEntities();
         getMetadata();
       } catch (NoSuchMethodException e) {
-        e.printStackTrace(); // To change body of catch statement use
-        // File | Settings | File Templates.
+        e.printStackTrace();
       } catch (ClassNotFoundException e) {
-        // TODO Auto-generated catch block
         e.printStackTrace();
       } catch (IntrospectionException e) {
-        // TODO Auto-generated catch block
         e.printStackTrace();
       }
     } else {
-      consoleLogger
-          .info("packageDocumentationResources not defined in plugin configuration");
+      consoleLogger.error("packageDocumentationResources not defined in plugin configuration");
     }
   }
 
@@ -124,7 +140,7 @@ public class MasterDocGenerator {
       try {
         entityClass = Class.forName(entity.toString(), true, newClassLoader);
       } catch (Exception e) {
-        consoleLogger.info(entity.toString() + " is not forNamable");
+        consoleLogger.info(format("{0} is not forNamable", entity.toString()));
         continue;
       }
       Entity newEntity = new Entity();
@@ -153,9 +169,7 @@ public class MasterDocGenerator {
     Reflections reflections = new Reflections(packageDocumentationResource);
     Set<Class<?>> reflectionResources = reflections
         .getTypesAnnotatedWith(Path.class);
-    // Set<String> serializables = reflections.getStore().getSubTypesOf("java.io.Serializable");
-    consoleLogger.info("Ressources : " + reflectionResources);
-    // consoleLogger.info("Possibles Dto(s) : " + serializables);
+    consoleLogger.info(format("Ressources : {0}", reflectionResources));
     for (Iterator<Class<?>> iterator = reflectionResources.iterator(); iterator
         .hasNext();) {
       Class<?> resource = iterator.next();
@@ -253,7 +267,7 @@ public class MasterDocGenerator {
     try {
       entityClass = Class.forName(entity.toString(), true, newClassLoader);
     } catch (Exception e) {
-      consoleLogger.info(entity.toString() + " is not forNamable");
+      consoleLogger.info(format("{0} is not forNamable", entity.toString()));
       return null;
     }
     if (entityClass.isEnum()) {
@@ -275,29 +289,38 @@ public class MasterDocGenerator {
       throws ClassNotFoundException, IntrospectionException {
     Map<String, AbstractEntity> fields = new HashMap<String, AbstractEntity>();
     final Class<?> entityClass = Class.forName(entity.toString(), true, newClassLoader);
-    consoleLogger.info(">>Extract fields for class " + entityClass + " ...");
+    consoleLogger.debug(format(">>Extract fields for class {0} ...", entityClass));
+
     final java.lang.reflect.Field[] declaredFields = entityClass
         .getDeclaredFields();
     for (int i = 0; i < declaredFields.length; i++) {
       java.lang.reflect.Field declaredField = declaredFields[i];
-      consoleLogger.info(">>>Extract field " + declaredField.getName() + " ...");
-      final String type = extractTypeFromType(declaredField.getType());
+      consoleLogger.debug(format(">>Extract fields  {0} ...", declaredField.getName()));
+      Type typeOfField = declaredField.getGenericType();
+      if (!typeOfField.toString().startsWith(CLASS) && !typeOfField.toString().startsWith(INTERFACE) && typeOfField.toString().indexOf(".") > -1) {
+        typeOfField = (ParameterizedType) typeOfField;
+      }
+      String type = extractTypeFromType(typeOfField);
+      final String typeDisplay = type;
+      if (type.indexOf("<") > -1) {
+        type = type.substring(type.indexOf("<") + 1, type.indexOf(">"));
+      }
       try {
-        entityClass.getDeclaredMethod("get" + capitalize(declaredField.getName())); // GET OR IS
+        entityClass.getDeclaredMethod(GET_PREFIX + capitalize(declaredField.getName())); // GET OR IS
         final Class<?> currEntityClass;
         try {
           currEntityClass = Class.forName(type, true, newClassLoader);
         } catch (Exception e) {
-          consoleLogger.info(entity.toString() + " is not forNamable");
+          consoleLogger.info(format("{0} is not forNamable", entity.toString()));
           continue;
         }
         AbstractEntity field;
         if (currEntityClass.isEnum()) {
           field = new Enumeration();
-          field.setName(type);
+          field.setName(typeDisplay);
         } else {
           field = new Entity();
-          field.setName(type);
+          field.setName(typeDisplay);
         }
         fields.put(declaredField.getName(), field);
         if (!entityList.contains(type)) {
@@ -312,7 +335,7 @@ public class MasterDocGenerator {
         }
       } catch (NoSuchMethodException e) {
         try {
-          entityClass.getDeclaredMethod("is"
+          entityClass.getDeclaredMethod(IS_PREFIX
               + capitalize(declaredField.getName())); // GET OR IS
           Entity field = new Entity();
           field.setName(declaredField.getName());
@@ -320,8 +343,7 @@ public class MasterDocGenerator {
           try {
             currEntityClass = Class.forName(type, true, newClassLoader);
           } catch (Exception e2) {
-            consoleLogger.info(entity.toString()
-                + " is not forNamable");
+            consoleLogger.info(format("{0} is not forNamable", entity.toString()));
             continue;
           }
           fields.put(declaredField.getName(), field);
@@ -341,9 +363,7 @@ public class MasterDocGenerator {
             }
           }
         } catch (NoSuchMethodException ex) {
-          consoleLogger.info(">>>>Bypass : " + entityClass.toString()
-              + "." + declaredField.getName());
-          ; // Not a field with getter => bypass
+          consoleLogger.info(format(">>>>Bypass : {0}.{1}", entityClass.toString(), declaredField.getName()));
         }
 
       }
@@ -392,12 +412,12 @@ public class MasterDocGenerator {
       ResourceEntry resourceEntry = entryList.get(key);
       Serializable requestEntity = resourceEntry.getRequestEntity();
       Serializable responseEntity = resourceEntry.getResponseEntity();
-      if (null != requestEntity && !"null".equals(requestEntity)
-          && !"void".equals(requestEntity)) {
+      if (null != requestEntity && !NULL.equals(requestEntity)
+          && !VOID.equals(requestEntity)) {
         entityList.add(removeList(requestEntity));
       }
-      if (null != responseEntity && !"null".equals(responseEntity)
-          && !"void".equals(responseEntity)) {
+      if (null != responseEntity && !NULL.equals(responseEntity)
+          && !VOID.equals(responseEntity)) {
         entityList.add(removeList(responseEntity));
       }
     }
@@ -444,19 +464,19 @@ public class MasterDocGenerator {
         resourceEntry.setCamelConsume(camelConsumeAnnotation);
       }
       if (declaredAnnotation instanceof GET) {
-        resourceEntry.setVerb("GET");
+        resourceEntry.setVerb(GET);
       }
       if (declaredAnnotation instanceof POST) {
-        resourceEntry.setVerb("POST");
+        resourceEntry.setVerb(POST);
       }
       if (declaredAnnotation instanceof PUT) {
-        resourceEntry.setVerb("PUT");
+        resourceEntry.setVerb(PUT);
       }
       if (declaredAnnotation instanceof DELETE) {
-        resourceEntry.setVerb("DELETE");
+        resourceEntry.setVerb(DELETE);
       }
       if (declaredAnnotation instanceof OPTIONS) {
-        resourceEntry.setVerb("OPTIONS");
+        resourceEntry.setVerb(OPTIONS);
       }
     }
 
@@ -475,7 +495,7 @@ public class MasterDocGenerator {
     Annotation[][] pAnnot = declaredMethod.getParameterAnnotations();
     for (int i = 0; i < pType.length; i++) {
       String typeName = ((Class) pType[i]).getName();
-      if ("java.util.HashMap".equals(typeName)) {
+      if (JAVA_UTIL_HASH_MAP.equals(typeName)) {
         Type[] types = declaredMethod.getGenericParameterTypes();
         ParameterizedType paramType = (ParameterizedType) types[i];
         typeName = extractTypeFromType(paramType);
@@ -487,14 +507,14 @@ public class MasterDocGenerator {
         Annotation annotation = pAnnot[i][j];
         if (annotation instanceof PathParam) {
           Param param = new Param();
-          param.setType("PathParam");
+          param.setType(PATH_PARAM);
           param.setClassName(typeName);
           param.setName(((PathParam) annotation).value());
           resourceEntry.getPathParams().add(param);
         }
         if (annotation instanceof QueryParam) {
           Param param = new Param();
-          param.setType("QueryParam");
+          param.setType(QUERY_PARAM);
           param.setClassName(typeName);
           param.setName(((QueryParam) annotation).value());
           resourceEntry.getQueryParams().add(param);
@@ -517,6 +537,9 @@ public class MasterDocGenerator {
 
   private String extractTypeFromType(Type type) {
     String returnType = null;
+    if (T.equals(type.toString())) {
+      return JAVA_LANG_OBJECT;
+    }
     if (type instanceof ParameterizedType) {
       returnType = type.toString();
       if (returnType.startsWith(CLASS)) {
@@ -575,9 +598,8 @@ public class MasterDocGenerator {
     masterDoc.setEntities(entities);
     masterDoc.setResources(resources);
     masterDoc.setMetadata(metadata);
-    consoleLogger.info("Generate files in " + pathToGenerateFile + "...");
+    consoleLogger.info(format("Generate files in {0} ...", pathToGenerateFile));
 
-    pathToGenerateFile = pathToGenerateFile.replaceAll("/", "\\");
     File theDir = new File(pathToGenerateFile);
     // if the directory does not exist, create it
     if (!theDir.exists()) {
@@ -585,7 +607,7 @@ public class MasterDocGenerator {
     }
 
     try {
-      File fileEntities = new File(pathToGenerateFile + "/masterdoc.json");
+      File fileEntities = new File(pathToGenerateFile + separator + MASTERDOC_JSON_FILENAME);
       BufferedWriter output = new BufferedWriter(new FileWriter(
           fileEntities));
       output.write(mapper.defaultPrettyPrintingWriter()
