@@ -73,6 +73,7 @@ public class MasterDocGenerator {
   private ClassLoader                  originalClassLoader     = Thread.currentThread().getContextClassLoader();
   private ClassLoader                  newClassLoader;
   private String                       pathToGenerateFile;
+  private HashSet<Serializable>        newEntities;
 
   // ----------------------------------------------------------------------
   // Constructors
@@ -114,7 +115,7 @@ public class MasterDocGenerator {
         && packageDocumentationResource.length() > 0) {
       try {
         getDocResource(packageDocumentationResource);
-        getEntities();
+        getEntities(entityList);
         getMetadata();
       } catch (NoSuchMethodException e) {
         e.printStackTrace();
@@ -131,9 +132,11 @@ public class MasterDocGenerator {
   // ----------------------------------------------------------------------
   // Private methods
   // ----------------------------------------------------------------------
-  private void getEntities() throws ClassNotFoundException,
+  private void getEntities(Set list) throws ClassNotFoundException,
       IntrospectionException {
-    for (Iterator<Serializable> iterator = entityList.iterator(); iterator
+
+    newEntities = new HashSet<Serializable>();
+    for (Iterator<Serializable> iterator = list.iterator(); iterator
         .hasNext();) {
       Serializable entity = iterator.next();
       final Class<?> entityClass;
@@ -153,6 +156,10 @@ public class MasterDocGenerator {
         newEntity.setFields(extractFields(entity));
         entities.add(newEntity);
       }
+    }
+    if (newEntities.size() > 0) {
+      entityList.addAll(newEntities);
+      getEntities((Set) newEntities.clone());
     }
   }
 
@@ -324,14 +331,7 @@ public class MasterDocGenerator {
         }
         fields.put(declaredField.getName(), field);
         if (!entityList.contains(type)) {
-          Entity newEntity = new Entity();
-          newEntity.setName(field.getName());
-          newEntity.setFields(extractFieldsSwitcher(type));
-          // enum are added as enumeration object in enumeration
-          // extract field method (do not add them as entity again)
-          if (!currEntityClass.isEnum()) {
-            entities.add(newEntity);
-          }
+          newEntities.add(type);
         }
       } catch (NoSuchMethodException e) {
         try {
@@ -355,12 +355,6 @@ public class MasterDocGenerator {
             Entity newEntity = new Entity();
             newEntity.setName(field.getName());
             newEntity.setFields(extractFieldsSwitcher(type));
-            // enum are added as enumeration object in enumeration
-            // extract field method (do not add them as entity
-            // again)
-            if (!currEntityClass.isEnum()) {
-              entities.add(newEntity);
-            }
           }
         } catch (NoSuchMethodException ex) {
           consoleLogger.info(format(">>>>Bypass : {0}.{1}", entityClass.toString(), declaredField.getName()));
