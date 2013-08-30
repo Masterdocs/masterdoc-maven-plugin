@@ -55,6 +55,10 @@ public class MasterDocGenerator {
   public static final String           T                       = "T";
   public static final String           JAVA_LANG_OBJECT        = "java.lang.Object";
   public static final String           JAVA                    = "java";
+  public static final String           BYTE                    = "B";
+  public static final String           ARRAY                   = "[]";
+  public static final String           DOT                     = ".";
+  public static final String           COMMA                   = ",";
 
   // ----------------------------------------------------------------------
   // Variables
@@ -158,7 +162,7 @@ public class MasterDocGenerator {
           final Class<?> superclass = entityClass.getSuperclass();
           if (!JAVA_LANG_OBJECT.equals(superclass.getName())) {
             newEntity.setSuperClass(superclass);
-            if (!entities.contains(superclass)) {
+            if (!entityList.contains(superclass.getName()) && !newEntities.contains(superclass.getName())) {
               newEntities.add(superclass.getName());
             }
           }
@@ -316,15 +320,26 @@ public class MasterDocGenerator {
       Type typeOfField = declaredField.getGenericType();
       if (!typeOfField.toString().startsWith(CLASS) &&
           !typeOfField.toString().startsWith(INTERFACE) &&
-          typeOfField.toString().indexOf(".") > -1) {
+          typeOfField.toString().indexOf(DOT) > -1) {
         typeOfField = (ParameterizedType) typeOfField;
       }
       String type = extractTypeFromType(typeOfField);
-      final String typeDisplay = type;
+      String typeDisplay = type;
+      if (type.startsWith("[")) {
+        if (type.startsWith("[L") && type.endsWith(";")) {
+          type = type.substring(2, type.length() - 1);
+        } else {
+          type = type.substring(1);
+          if (BYTE.equals(type)) {
+            type = byte.class.getName();
+          }
+        }
+        typeDisplay = type + ARRAY;
+      }
       if (type.indexOf("<") > -1) {
         type = type.substring(type.indexOf("<") + 1, type.indexOf(">"));
       }
-      String[] types = type.split(",");
+      String[] types = type.split(COMMA);
       try {
         entityClass.getDeclaredMethod(GET_PREFIX + capitalize(declaredField.getName())); // GET OR IS
         Class<?> currEntityClass = null;
@@ -332,7 +347,7 @@ public class MasterDocGenerator {
           try {
             t = t.trim();
             currEntityClass = Class.forName(t, true, newClassLoader);
-            if (!entityList.contains(t)) {
+            if (!entityList.contains(t) && !newEntities.contains(t)) {
               newEntities.add(t);
             }
           } catch (Exception e) {
