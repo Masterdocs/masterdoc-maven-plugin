@@ -54,6 +54,7 @@ public class MasterDocGenerator {
   public static final String           INTERFACE               = "interface";
   public static final String           T                       = "T";
   public static final String           JAVA_LANG_OBJECT        = "java.lang.Object";
+  public static final String           JAVA                    = "java";
 
   // ----------------------------------------------------------------------
   // Variables
@@ -114,11 +115,10 @@ public class MasterDocGenerator {
     if (null != packageDocumentationResource
         && packageDocumentationResource.length() > 0) {
       try {
+        getMetadata();
         getDocResource(packageDocumentationResource);
         getEntities(entityList);
-        getMetadata();
-      } catch (NoSuchMethodException e) {
-        e.printStackTrace();
+        consoleLogger.info(format("Entities : {0}", entityList.size()));
       } catch (ClassNotFoundException e) {
         e.printStackTrace();
       } catch (IntrospectionException e) {
@@ -143,18 +143,28 @@ public class MasterDocGenerator {
       try {
         entityClass = Class.forName(entity.toString(), true, newClassLoader);
       } catch (Exception e) {
-        consoleLogger.info(format("{0} is not forNamable", entity.toString()));
+        consoleLogger.debug(format("{0} is not forNamable", entity.toString()));
         continue;
       }
       Entity newEntity = new Entity();
+      if (!entity.toString().startsWith(JAVA)) {
 
-      newEntity.setName(entity.toString());
+        newEntity.setName(entity.toString());
 
-      if (entityClass.isEnum()) {
-        extractEnumFields(entity);
-      } else {
-        newEntity.setFields(extractFields(entity));
-        entities.add(newEntity);
+        if (entityClass.isEnum()) {
+          extractEnumFields(entity);
+        } else {
+          newEntity.setFields(extractFields(entity));
+          final Class<?> superclass = entityClass.getSuperclass();
+          if (!JAVA_LANG_OBJECT.equals(superclass.getName())) {
+            newEntity.setSuperClass(superclass);
+            if (!entities.contains(superclass)) {
+              newEntities.add(superclass.getName());
+            }
+          }
+
+          entities.add(newEntity);
+        }
       }
     }
     if (newEntities.size() > 0) {
@@ -170,7 +180,7 @@ public class MasterDocGenerator {
    * @throws SecurityException
    */
 
-  private void getDocResource(String packageDocumentationResource) throws NoSuchMethodException {
+  private void getDocResource(String packageDocumentationResource) {
     String mediaTypeProduces = null, mediaTypeConsumes = null;
 
     Reflections reflections = new Reflections(packageDocumentationResource);
@@ -205,7 +215,7 @@ public class MasterDocGenerator {
         Class<?> superclass = resource.getSuperclass();
         if (null != superclass
             && !superclass.getCanonicalName().equals(
-                "java.lang.Object")) {
+                JAVA_LANG_OBJECT)) {
           Method[] superclassDeclaredMethods = superclass
               .getDeclaredMethods();
           for (int i = 0; i < superclassDeclaredMethods.length; i++) {
@@ -241,11 +251,11 @@ public class MasterDocGenerator {
           }
         }
 
-        consoleLogger.info(">> " + resource.getCanonicalName());
+        consoleLogger.debug(">> " + resource.getCanonicalName());
         resources.add(res);
         extractEntityFromResourceEntries(res);
       } else {
-        consoleLogger.info(">>skip " + resource.getCanonicalName());
+        consoleLogger.debug(">>skip " + resource.getCanonicalName());
       }
     }
   }
@@ -274,7 +284,7 @@ public class MasterDocGenerator {
     try {
       entityClass = Class.forName(entity.toString(), true, newClassLoader);
     } catch (Exception e) {
-      consoleLogger.info(format("{0} is not forNamable", entity.toString()));
+      consoleLogger.debug(format("{0} is not forNamable", entity.toString()));
       return null;
     }
     if (entityClass.isEnum()) {
@@ -304,7 +314,9 @@ public class MasterDocGenerator {
       java.lang.reflect.Field declaredField = declaredFields[i];
       consoleLogger.debug(format(">>Extract fields  {0} ...", declaredField.getName()));
       Type typeOfField = declaredField.getGenericType();
-      if (!typeOfField.toString().startsWith(CLASS) && !typeOfField.toString().startsWith(INTERFACE) && typeOfField.toString().indexOf(".") > -1) {
+      if (!typeOfField.toString().startsWith(CLASS) &&
+          !typeOfField.toString().startsWith(INTERFACE) &&
+          typeOfField.toString().indexOf(".") > -1) {
         typeOfField = (ParameterizedType) typeOfField;
       }
       String type = extractTypeFromType(typeOfField);
@@ -312,17 +324,24 @@ public class MasterDocGenerator {
       if (type.indexOf("<") > -1) {
         type = type.substring(type.indexOf("<") + 1, type.indexOf(">"));
       }
+      String[] types = type.split(",");
       try {
         entityClass.getDeclaredMethod(GET_PREFIX + capitalize(declaredField.getName())); // GET OR IS
-        final Class<?> currEntityClass;
-        try {
-          currEntityClass = Class.forName(type, true, newClassLoader);
-        } catch (Exception e) {
-          consoleLogger.info(format("{0} is not forNamable", entity.toString()));
-          continue;
+        Class<?> currEntityClass = null;
+        for (String t : types) {
+          try {
+            t = t.trim();
+            currEntityClass = Class.forName(t, true, newClassLoader);
+            if (!entityList.contains(t)) {
+              newEntities.add(t);
+            }
+          } catch (Exception e) {
+            consoleLogger.debug(format("{0} is not forNamable", t.toString()));
+            continue;
+          }
         }
         AbstractEntity field;
-        if (currEntityClass.isEnum()) {
+        if (null != currEntityClass && currEntityClass.isEnum()) {
           field = new Enumeration();
           field.setName(typeDisplay);
         } else {
@@ -330,9 +349,7 @@ public class MasterDocGenerator {
           field.setName(typeDisplay);
         }
         fields.put(declaredField.getName(), field);
-        if (!entityList.contains(type)) {
-          newEntities.add(type);
-        }
+
       } catch (NoSuchMethodException e) {
         try {
           entityClass.getDeclaredMethod(IS_PREFIX
@@ -343,7 +360,7 @@ public class MasterDocGenerator {
           try {
             currEntityClass = Class.forName(type, true, newClassLoader);
           } catch (Exception e2) {
-            consoleLogger.info(format("{0} is not forNamable", entity.toString()));
+            consoleLogger.debug(format("{0} is not forNamable", entity.toString()));
             continue;
           }
           fields.put(declaredField.getName(), field);
@@ -357,7 +374,7 @@ public class MasterDocGenerator {
             newEntity.setFields(extractFieldsSwitcher(type));
           }
         } catch (NoSuchMethodException ex) {
-          consoleLogger.info(format(">>>>Bypass : {0}.{1}", entityClass.toString(), declaredField.getName()));
+          consoleLogger.debug(format(">>>>Bypass : {0}.{1}", entityClass.toString(), declaredField.getName()));
         }
 
       }
@@ -382,7 +399,7 @@ public class MasterDocGenerator {
       entityString = entityString.substring(entityString.indexOf(CLASS)
           + CLASS.length());
     }
-    consoleLogger.info(">>>Extract enum " + entityString + " ...");
+    consoleLogger.debug(">>>Extract enum " + entityString + " ...");
     final Class<?> entityClass = Class.forName(entityString, true, newClassLoader);
     final Object[] declaredEnumConstants = entityClass.getEnumConstants();
     Enumeration newEnumeration = new Enumeration();
