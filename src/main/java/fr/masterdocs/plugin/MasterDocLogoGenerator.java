@@ -1,4 +1,4 @@
-package com.masterdoc.plugin;
+package fr.masterdocs.plugin;
 
 import org.codehaus.plexus.logging.console.ConsoleLogger;
 
