@@ -18,6 +18,8 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 import javax.ws.rs.*;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlTransient;
 
 import org.apache.camel.Consume;
 import org.apache.maven.artifact.Artifact;
@@ -167,8 +169,9 @@ public class MasterDocGenerator {
               newEntities.add(superclass.getName());
             }
           }
-
-          entities.add(newEntity);
+          if (newEntity.getFields().size() > 0 || null != newEntity.getSuperClass()) {
+            entities.add(newEntity);
+          }
         }
       }
     }
@@ -294,9 +297,13 @@ public class MasterDocGenerator {
       java.lang.reflect.Field declaredField = declaredFields[i];
       final Annotation[] declaredAnnotations = declaredField.getDeclaredAnnotations();
       boolean bypass = false;
+      String name = null;
       for (Annotation annotation : declaredAnnotations) {
-        if (annotation instanceof JsonIgnore) {
+        if (annotation instanceof JsonIgnore || annotation instanceof XmlTransient) {
           bypass = true;
+        }
+        if (annotation instanceof XmlElement) {
+          name = ((XmlElement) annotation).name();
         }
       }
       if (!bypass) {
@@ -326,13 +333,13 @@ public class MasterDocGenerator {
         String[] types = type.split(COMMA);
         try {
           entityClass.getDeclaredMethod(GET_PREFIX + capitalize(declaredField.getName())); // GET OR IS
-          createEntityFromField(fields, declaredField, typeDisplay, types);
+          createEntityFromField(fields, declaredField, typeDisplay, types, null != name ? name : declaredField.getName());
 
         } catch (NoSuchMethodException e) {
           try {
             entityClass.getDeclaredMethod(IS_PREFIX
                 + capitalize(declaredField.getName())); // GET OR IS
-            createEntityFromField(fields, declaredField, typeDisplay, types);
+            createEntityFromField(fields, declaredField, typeDisplay, types, null != name ? name : declaredField.getName());
 
           } catch (NoSuchMethodException ex) {
             consoleLogger.debug(format(">>>>Bypass : {0}.{1}", entityClass.toString(), declaredField.getName()));
@@ -344,7 +351,7 @@ public class MasterDocGenerator {
     return fields;
   }
 
-  private void createEntityFromField(Map<String, AbstractEntity> fields, Field declaredField, String typeDisplay, String[] types) {
+  private void createEntityFromField(Map<String, AbstractEntity> fields, Field declaredField, String typeDisplay, String[] types, String name) {
     Class<?> currEntityClass = null;
     for (String t : types) {
       try {
@@ -366,7 +373,7 @@ public class MasterDocGenerator {
       field = new Entity();
       field.setName(typeDisplay);
     }
-    fields.put(declaredField.getName(), field);
+    fields.put(name, field);
   }
 
   /**
