@@ -32,10 +32,16 @@ public class MasterDocPlugin extends AbstractMojo {
   @Parameter(property = "packageDocumentationResources", readonly = true, required = true)
   private String[]     packageDocumentationResources;
 
+  /**
+   * Generate html5 site
+   */
+  @Parameter(property = "generateHTMLSite", readonly = true, required = false, defaultValue = "true")
+  private boolean      generateHTMLSite;
+
   public void execute() throws MojoExecutionException {
     new MasterDocLogoGenerator();
     try {
-      new MasterDocGenerator(project, pathToGenerateFile, packageDocumentationResources);
+      new MasterDocGenerator(project, pathToGenerateFile, packageDocumentationResources, generateHTMLSite);
     } catch (SecurityException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();

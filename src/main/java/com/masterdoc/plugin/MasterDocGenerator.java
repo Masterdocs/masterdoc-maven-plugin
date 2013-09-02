@@ -16,9 +16,10 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
 import javax.ws.rs.*;
-import javax.ws.rs.core.Context;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlTransient;
 
@@ -30,6 +31,10 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.plexus.logging.console.ConsoleLogger;
 import org.reflections.Reflections;
 
+import com.github.jknack.handlebars.Context;
+import com.github.jknack.handlebars.Handlebars;
+import com.github.jknack.handlebars.Template;
+import com.github.jknack.handlebars.io.FileTemplateLoader;
 import com.googlecode.gentyref.GenericTypeReflector;
 import com.masterdoc.pojo.*;
 import com.masterdoc.pojo.Enumeration;
@@ -42,7 +47,7 @@ public class MasterDocGenerator {
 
   public static final String           CLASS                   = "class ";
   public static final SimpleDateFormat SDF                     = new SimpleDateFormat("dd-MM-yyyy HH:mm:sss");
-  public static final String           MASTERDOC_JSON_FILENAME = "masterdoc.json";
+  public static final String           MASTERDOC_JSON_FILENAME = "masterdocs.json";
   public static final String           PATH_PARAM              = "PathParam";
   public static final String           QUERY_PARAM             = "QueryParam";
   public static final String           JAVA_UTIL_HASH_MAP      = "java.util.HashMap";
@@ -63,6 +68,7 @@ public class MasterDocGenerator {
   public static final String           ARRAY                   = "[]";
   public static final String           DOT                     = ".";
   public static final String           COMMA                   = ",";
+  public static final String           MASTERDOCS_DIR          = "masterdocs";
 
   // ----------------------------------------------------------------------
   // Variables
@@ -88,7 +94,7 @@ public class MasterDocGenerator {
   // Constructors
   // ----------------------------------------------------------------------
 
-  public MasterDocGenerator(MavenProject project, String pathToGenerateFile, String[] packageDocumentationResources)
+  public MasterDocGenerator(MavenProject project, String pathToGenerateFile, String[] packageDocumentationResources, boolean generateHTMLSite)
       throws SecurityException,
       NoSuchFieldException,
       IllegalArgumentException, IllegalAccessException {
@@ -107,11 +113,40 @@ public class MasterDocGenerator {
       startGeneration(new String[] { packageDocumentationResource });
     }
     //
-    generateDocumentationFile();
+    generateDocumentationFile(generateHTMLSite);
     //
     // restore original classloader
     Thread.currentThread().setContextClassLoader(originalClassLoader);
     consoleLogger.info(format("Generation ended in {0} ms", (System.currentTimeMillis() - start)));
+  }
+
+  private static void copy(InputStream in, OutputStream out) throws IOException {
+    byte[] buffer = new byte[1024];
+    while (true) {
+      int readCount = in.read(buffer);
+      if (readCount < 0) {
+        break;
+      }
+      out.write(buffer, 0, readCount);
+    }
+  }
+
+  private static void copy(File file, OutputStream out) throws IOException {
+    InputStream in = new FileInputStream(file);
+    try {
+      copy(in, out);
+    } finally {
+      in.close();
+    }
+  }
+
+  private static void copy(InputStream in, File file) throws IOException {
+    OutputStream out = new FileOutputStream(file);
+    try {
+      copy(in, out);
+    } finally {
+      out.close();
+    }
   }
 
   // ----------------------------------------------------------------------
@@ -525,7 +560,7 @@ public class MasterDocGenerator {
           resourceEntry.getQueryParams().add(param);
           isAParam = true;
         }
-        if (annotation instanceof Context) {
+        if (annotation instanceof javax.ws.rs.core.Context) {
           isAParam = true;
         }
       }
@@ -601,9 +636,9 @@ public class MasterDocGenerator {
   }
 
   /**
-   * 
+   * @param generateHTMLSite
    */
-  private void generateDocumentationFile() {
+  private void generateDocumentationFile(boolean generateHTMLSite) {
     JacksonJsonProvider jsonProvider = new JacksonJsonProvider();
     ObjectMapper mapper = jsonProvider.getObjectMapper();
     MasterDoc masterDoc = new MasterDoc();
@@ -614,10 +649,7 @@ public class MasterDocGenerator {
 
     File theDir = new File(pathToGenerateFile);
     // if the directory does not exist, create it
-    if (!theDir.exists()) {
-      boolean ret = theDir.mkdirs();
-    }
-
+    theDir.mkdirs();
     try {
       File fileEntities = new File(pathToGenerateFile + separator + MASTERDOC_JSON_FILENAME);
       BufferedWriter output = new BufferedWriter(new FileWriter(
@@ -625,6 +657,44 @@ public class MasterDocGenerator {
       output.write(mapper.defaultPrettyPrintingWriter()
           .writeValueAsString(masterDoc));
       output.close();
+      if (generateHTMLSite) {
+        consoleLogger.debug("Start HTMLSite generation");
+        final URL location = getClass().getProtectionDomain().getCodeSource().getLocation();
+        final ZipFile zipFile = new ZipFile(location.getPath());
+        final java.util.Enumeration<? extends ZipEntry> entries = zipFile.entries();
+        while (entries.hasMoreElements()) {
+          ZipEntry entry = entries.nextElement();
+          if (entry.getName().startsWith(MASTERDOCS_DIR)) {
+            consoleLogger.debug(format("Copy file : {0}", entry.getName()));
+            File file = new File(pathToGenerateFile + separator, entry.getName());
+            if (entry.isDirectory()) {
+              file.mkdirs();
+            } else {
+              file.getParentFile().mkdirs();
+              InputStream in = zipFile.getInputStream(entry);
+              try {
+                copy(in, file);
+              } finally {
+                in.close();
+              }
+            }
+          }
+
+        }
+        String handlebarsTemplate = pathToGenerateFile + separator + MASTERDOCS_DIR + separator;
+        final FileTemplateLoader fileTemplateLoader = new FileTemplateLoader(handlebarsTemplate);
+        Handlebars handlebars = new Handlebars(fileTemplateLoader);
+        Template template = handlebars.compile("index");
+        Context ctx = Context.newContext(masterDoc);
+        final String newIndex = template.apply(ctx);
+        File indexFile = new File(handlebarsTemplate + "index.html");
+        FileWriter fw = new FileWriter(indexFile.getAbsoluteFile());
+        BufferedWriter bw = new BufferedWriter(fw);
+        bw.write(newIndex);
+        bw.close();
+
+        consoleLogger.info(format("HTMLSite generate in {0}", pathToGenerateFile));
+      }
     } catch (IOException e) {
       e.printStackTrace();
     }
