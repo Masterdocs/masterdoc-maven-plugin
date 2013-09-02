@@ -2,6 +2,9 @@ package fr.masterdocs.plugin;
 
 import com.github.jknack.handlebars.*;
 import com.github.jknack.handlebars.io.FileTemplateLoader;
+import com.google.common.base.Function;
+import com.google.common.collect.ImmutableSortedSet;
+import com.google.common.collect.Ordering;
 import com.googlecode.gentyref.GenericTypeReflector;
 import fr.masterdocs.pojo.*;
 import fr.masterdocs.pojo.Enumeration;
@@ -202,7 +205,7 @@ public class MasterDocGenerator {
 			Entity newEntity = new Entity();
 			if (!entity.toString().startsWith(JAVA)) {
 
-				newEntity.setName(entity.toString());
+				newEntity.setName(extractName(entity.toString()));
 
 				if (entityClass.isEnum()) {
 					extractEnumFields(entity);
@@ -225,6 +228,10 @@ public class MasterDocGenerator {
 			entityList.addAll(newEntities);
 			getEntities((Set) newEntities.clone());
 		}
+	}
+
+	private String extractName(String fqn) {
+		return fqn.substring(fqn.lastIndexOf(DOT));
 	}
 
 	/**
@@ -414,10 +421,10 @@ public class MasterDocGenerator {
 		AbstractEntity field;
 		if (null != currEntityClass && currEntityClass.isEnum()) {
 			field = new Enumeration();
-			field.setName(typeDisplay);
+			field.setName(extractName(typeDisplay));
 		} else {
 			field = new Entity();
-			field.setName(typeDisplay);
+			field.setName(extractName(typeDisplay));
 		}
 		fields.put(name, field);
 	}
@@ -443,7 +450,7 @@ public class MasterDocGenerator {
 		final Class<?> entityClass = Class.forName(entityString, true, newClassLoader);
 		final Object[] declaredEnumConstants = entityClass.getEnumConstants();
 		Enumeration newEnumeration = new Enumeration();
-		newEnumeration.setName(entityString);
+		newEnumeration.setName(extractName(entityString));
 		for (int i = 0; i < declaredEnumConstants.length; i++) {
 			values.add(declaredEnumConstants[i].toString());
 		}
@@ -652,7 +659,18 @@ public class MasterDocGenerator {
 		JacksonJsonProvider jsonProvider = new JacksonJsonProvider();
 		ObjectMapper mapper = jsonProvider.getObjectMapper();
 		MasterDoc masterDoc = new MasterDoc();
-		masterDoc.setEntities(entities);
+		Function<AbstractEntity, String> getNameFunction = new Function<AbstractEntity, String>() {
+			public String apply(AbstractEntity from) {
+				String name = from.getName();
+				return name.substring(name.lastIndexOf(MasterDocGenerator.DOT));
+			}
+		};
+
+		Ordering<AbstractEntity> nameOrdering = Ordering.natural().onResultOf(getNameFunction);
+
+		ImmutableSortedSet<AbstractEntity> sortedEntities = ImmutableSortedSet.orderedBy(
+				nameOrdering).addAll(entities).build();
+		masterDoc.setEntities(sortedEntities.asList());
 		masterDoc.setResources(resources);
 		masterDoc.setMetadata(metadata);
 		consoleLogger.info(format("Generate files in {0} ...", pathToGenerateFile));
@@ -713,6 +731,14 @@ public class MasterDocGenerator {
 					return options.inverse();
 			}
 		});
+
+		handlebars.registerHelper("extractName", new Helper<AbstractEntity>() {
+			@Override
+			public CharSequence apply(AbstractEntity abstractEntity, Options options) throws IOException {
+				return abstractEntity.getName().substring(abstractEntity.getName().lastIndexOf(DOT) + 1);
+			}
+		});
+
 		Template template = handlebars.compile("index");
 		Context ctx = Context.newContext(masterDoc);
 		String newIndex = template.apply(ctx);
