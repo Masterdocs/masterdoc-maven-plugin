@@ -22,6 +22,7 @@ import javax.ws.rs.*;
 import org.apache.camel.Consume;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.project.MavenProject;
+import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.plexus.logging.console.ConsoleLogger;
 import org.reflections.Reflections;
@@ -274,31 +275,6 @@ public class MasterDocGenerator {
   }
 
   /**
-   * Method to switch from class OR enum
-   * 
-   * @param entity
-   * @return
-   * @throws ClassNotFoundException
-   * @throws IntrospectionException
-   */
-  private Map<String, AbstractEntity> extractFieldsSwitcher(
-      Serializable entity) throws ClassNotFoundException,
-      IntrospectionException {
-    final Class<?> entityClass;
-    try {
-      entityClass = Class.forName(entity.toString(), true, newClassLoader);
-    } catch (Exception e) {
-      consoleLogger.debug(format("{0} is not forNamable", entity.toString()));
-      return null;
-    }
-    if (entityClass.isEnum()) {
-      return extractEnumFields(entity);
-    } else {
-      return extractFields(entity);
-    }
-  }
-
-  /**
    * Method to extract the class values.
    * 
    * @param entity
@@ -316,44 +292,53 @@ public class MasterDocGenerator {
         .getDeclaredFields();
     for (int i = 0; i < declaredFields.length; i++) {
       java.lang.reflect.Field declaredField = declaredFields[i];
-      consoleLogger.debug(format(">>Extract fields  {0} ...", declaredField.getName()));
-      Type typeOfField = declaredField.getGenericType();
-      if (!typeOfField.toString().startsWith(CLASS) &&
-          !typeOfField.toString().startsWith(INTERFACE) &&
-          typeOfField.toString().indexOf(DOT) > -1) {
-        typeOfField = (ParameterizedType) typeOfField;
-      }
-      String type = extractTypeFromType(typeOfField);
-      String typeDisplay = type;
-      if (type.startsWith("[")) {
-        if (type.startsWith("[L") && type.endsWith(";")) {
-          type = type.substring(2, type.length() - 1);
-        } else {
-          type = type.substring(1);
-          if (BYTE.equals(type)) {
-            type = byte.class.getName();
-          }
+      final Annotation[] declaredAnnotations = declaredField.getDeclaredAnnotations();
+      boolean bypass = false;
+      for (Annotation annotation : declaredAnnotations) {
+        if (annotation instanceof JsonIgnore) {
+          bypass = true;
         }
-        typeDisplay = type + ARRAY;
       }
-      if (type.indexOf("<") > -1) {
-        type = type.substring(type.indexOf("<") + 1, type.indexOf(">"));
-      }
-      String[] types = type.split(COMMA);
-      try {
-        entityClass.getDeclaredMethod(GET_PREFIX + capitalize(declaredField.getName())); // GET OR IS
-        createEntityFromField(fields, declaredField, typeDisplay, types);
-
-      } catch (NoSuchMethodException e) {
+      if (!bypass) {
+        consoleLogger.debug(format(">>Extract fields  {0} ...", declaredField.getName()));
+        Type typeOfField = declaredField.getGenericType();
+        if (!typeOfField.toString().startsWith(CLASS) &&
+            !typeOfField.toString().startsWith(INTERFACE) &&
+            typeOfField.toString().indexOf(DOT) > -1) {
+          typeOfField = (ParameterizedType) typeOfField;
+        }
+        String type = extractTypeFromType(typeOfField);
+        String typeDisplay = type;
+        if (type.startsWith("[")) {
+          if (type.startsWith("[L") && type.endsWith(";")) {
+            type = type.substring(2, type.length() - 1);
+          } else {
+            type = type.substring(1);
+            if (BYTE.equals(type)) {
+              type = byte.class.getName();
+            }
+          }
+          typeDisplay = type + ARRAY;
+        }
+        if (type.indexOf("<") > -1) {
+          type = type.substring(type.indexOf("<") + 1, type.indexOf(">"));
+        }
+        String[] types = type.split(COMMA);
         try {
-          entityClass.getDeclaredMethod(IS_PREFIX
-              + capitalize(declaredField.getName())); // GET OR IS
+          entityClass.getDeclaredMethod(GET_PREFIX + capitalize(declaredField.getName())); // GET OR IS
           createEntityFromField(fields, declaredField, typeDisplay, types);
 
-        } catch (NoSuchMethodException ex) {
-          consoleLogger.debug(format(">>>>Bypass : {0}.{1}", entityClass.toString(), declaredField.getName()));
-        }
+        } catch (NoSuchMethodException e) {
+          try {
+            entityClass.getDeclaredMethod(IS_PREFIX
+                + capitalize(declaredField.getName())); // GET OR IS
+            createEntityFromField(fields, declaredField, typeDisplay, types);
 
+          } catch (NoSuchMethodException ex) {
+            consoleLogger.debug(format(">>>>Bypass : {0}.{1}", entityClass.toString(), declaredField.getName()));
+          }
+
+        }
       }
     }
     return fields;
