@@ -109,7 +109,7 @@
 			<version>${plexus-spring.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>com.masterdoc</groupId>
+			<groupId>fr.masterdocs</groupId>
 			<artifactId>masterdoc-entity</artifactId>
 			<version>${masterdoc-entity.version}</version>
 		</dependency>
