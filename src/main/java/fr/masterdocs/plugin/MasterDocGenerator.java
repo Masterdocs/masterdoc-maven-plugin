@@ -671,7 +671,17 @@ public class MasterDocGenerator {
 		ImmutableSortedSet<AbstractEntity> sortedEntities = ImmutableSortedSet.orderedBy(
 				nameOrdering).addAll(entities).build();
 		masterDoc.setEntities(sortedEntities.asList());
-		masterDoc.setResources(resources);
+		Function<Resource, String> getPathFunction = new Function<Resource, String>() {
+			public String apply(Resource from) {
+				return from.getRootPath();
+			}
+		};
+
+		Ordering<Resource> pathOrdering = Ordering.natural().onResultOf(getPathFunction);
+
+		ImmutableSortedSet<Resource> sortedResources = ImmutableSortedSet.orderedBy(
+				pathOrdering).addAll(masterDoc.getResources()).build();
+		masterDoc.setResources(sortedResources.asList());
 		masterDoc.setMetadata(metadata);
 		consoleLogger.info(format("Generate files in {0} ...", pathToGenerateFile));
 
