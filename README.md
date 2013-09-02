@@ -7,7 +7,7 @@ Just add in your <i>pom.xml</i> with :
 ```
 
 <plugin>
-    <groupId>com.masterdoc</groupId>
+    <groupId>fr.masterdocs</groupId>
     <artifactId>masterdoc-maven-plugin</artifactId>
     <version>1.0-SNAPSHOT</version>
     <executions>
