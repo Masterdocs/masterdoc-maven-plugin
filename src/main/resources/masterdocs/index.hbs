@@ -85,6 +85,11 @@
                     {{#each resources}}
                     <dl id="{{rootPath}}" class="box">
                         <dt>{{rootPath}}</dt>
+                        <ul>
+                        {{#each entryList}}
+                        <li><span class="ink-label {{getLabelColor this}}">{{this.verb}}</span> {{this.path}}</li>
+                        {{/each}}
+                        </ul>
                     </dl>
                     {{/each}}
                 </section>

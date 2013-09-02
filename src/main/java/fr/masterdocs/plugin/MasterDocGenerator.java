@@ -742,6 +742,25 @@ public class MasterDocGenerator {
 			}
 		});
 
+		handlebars.registerHelper("getLabelColor", new Helper<ResourceEntry>() {
+			@Override
+			public CharSequence apply(ResourceEntry entry, Options options) throws IOException {
+				if ("GET".equals(entry.getVerb())) {
+					return "info";
+				}
+				if ("DELETE".equals(entry.getVerb())) {
+					return "error";
+				}
+				if ("POST".equals(entry.getVerb())) {
+					return "success";
+				}
+				if ("PUT".equals(entry.getVerb())) {
+					return "warning";
+				}
+				return "info";
+			}
+		});
+
 		handlebars.registerHelper("extractName", new Helper<AbstractEntity>() {
 			@Override
 			public CharSequence apply(AbstractEntity abstractEntity, Options options) throws IOException {
