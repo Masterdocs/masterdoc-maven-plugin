@@ -342,52 +342,14 @@ public class MasterDocGenerator {
       String[] types = type.split(COMMA);
       try {
         entityClass.getDeclaredMethod(GET_PREFIX + capitalize(declaredField.getName())); // GET OR IS
-        Class<?> currEntityClass = null;
-        for (String t : types) {
-          try {
-            t = t.trim();
-            currEntityClass = Class.forName(t, true, newClassLoader);
-            if (!entityList.contains(t) && !newEntities.contains(t)) {
-              newEntities.add(t);
-            }
-          } catch (Exception e) {
-            consoleLogger.debug(format("{0} is not forNamable", t.toString()));
-            continue;
-          }
-        }
-        AbstractEntity field;
-        if (null != currEntityClass && currEntityClass.isEnum()) {
-          field = new Enumeration();
-          field.setName(typeDisplay);
-        } else {
-          field = new Entity();
-          field.setName(typeDisplay);
-        }
-        fields.put(declaredField.getName(), field);
+        createEntityFromField(fields, declaredField, typeDisplay, types);
 
       } catch (NoSuchMethodException e) {
         try {
           entityClass.getDeclaredMethod(IS_PREFIX
               + capitalize(declaredField.getName())); // GET OR IS
-          Entity field = new Entity();
-          field.setName(declaredField.getName());
-          final Class<?> currEntityClass;
-          try {
-            currEntityClass = Class.forName(type, true, newClassLoader);
-          } catch (Exception e2) {
-            consoleLogger.debug(format("{0} is not forNamable", entity.toString()));
-            continue;
-          }
-          fields.put(declaredField.getName(), field);
-          if (!entityList.contains(type)) {
-            if (currEntityClass.isEnum()) {
-              Enumeration newEnum = new Enumeration();
-              newEnum.setName(field.getName());
-            }
-            Entity newEntity = new Entity();
-            newEntity.setName(field.getName());
-            newEntity.setFields(extractFieldsSwitcher(type));
-          }
+          createEntityFromField(fields, declaredField, typeDisplay, types);
+
         } catch (NoSuchMethodException ex) {
           consoleLogger.debug(format(">>>>Bypass : {0}.{1}", entityClass.toString(), declaredField.getName()));
         }
@@ -395,6 +357,31 @@ public class MasterDocGenerator {
       }
     }
     return fields;
+  }
+
+  private void createEntityFromField(Map<String, AbstractEntity> fields, Field declaredField, String typeDisplay, String[] types) {
+    Class<?> currEntityClass = null;
+    for (String t : types) {
+      try {
+        t = t.trim();
+        currEntityClass = Class.forName(t, true, newClassLoader);
+        if (!entityList.contains(t) && !newEntities.contains(t)) {
+          newEntities.add(t);
+        }
+      } catch (Exception e) {
+        consoleLogger.debug(format("{0} is not forNamable", t.toString()));
+        continue;
+      }
+    }
+    AbstractEntity field;
+    if (null != currEntityClass && currEntityClass.isEnum()) {
+      field = new Enumeration();
+      field.setName(typeDisplay);
+    } else {
+      field = new Entity();
+      field.setName(typeDisplay);
+    }
+    fields.put(declaredField.getName(), field);
   }
 
   /**
