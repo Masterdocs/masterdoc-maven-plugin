@@ -49,26 +49,64 @@
             padding: 0.5em 1em 0.5em 0;
             margin: 0;        
            }
+           .box {
+             border-radius: 4px;
+             -webkit-box-shadow: 0 2px 3px 0 #dddddd;
+             -moz-box-shadow: 0 2px 3px 0 #dddddd;
+             box-shadow: 0 2px 3px 0 #dddddd;
+             border: 1px solid #BBB;
+             background-color: #FFF;
+             padding: 1em;
+             margin-top: 1em;
+           }
         </style>
     </head>
     
     <body>
         <div class="ink-grid">
             <header>
-                <h1 class="pull-left medium-100 small-100">
+                <h1 id="header" class="pull-left medium-100 small-100">
                     MasterDocs for {{metadata.groupId}}.{{metadata.artifactId}}<small>Version {{metadata.version}}</small>
                 </h1>
-                <nav class="ink-navigation pull-right medium-100 small-100">
-                    <ul class="menu horizontal black shadowed">
-                        <li><a href="#">Overview</a></li>
-                        <li><a href="#">Resources</a></li>
-                        <li><a href="#">Entities</a></li>
-                    </ul>
-                </nav>             
             </header>
-            <div class="column-group">
-                <div class="large-100 medium-100 small-100">
-                    <h2>Overview</h2>
+            <div class="column-group gutters">
+                <div class="large-20 medium-25 small-100">
+                    <nav class="ink-navigation sticky" data-offset-top="70px" data-offset-bottom="350px" id="alerts_menu">
+                        <ul class="menu vertical black rounded">
+                            <li class=""><a class="scrollableLink" href="#header"><span class="icon-chevron-up"></span> Back to Top</a></li>
+                            <li class="active"><a class="scrollableLink" href="#nav-resources">Resources</a></li>
+                            <li class=""><a class="scrollableLink" href="#nav-entities">Entities</a></li>
+                                        </ul>
+                    </nav>
+                </div>
+                <div class="large-80 medium-75 small-100">
+                <section id="nav-resources" data-spy="true" data-target="#alerts_menu">
+                    <h2>Resources</h2>
+                    {{#each resources}}
+                    <dl id="{{rootPath}}" class="box">
+                        <dt>{{rootPath}}</dt>
+                    </dl>
+                    {{/each}}
+                </section>
+                <section id="nav-entities" data-spy="true" data-target="#alerts_menu">
+                    <h2>Entities</h2>
+
+                    {{#each entities}}
+                    <dl id="{{name}}" class="box">
+                    <dt>
+                    {{#isEnum}}
+                        <span class="ink-label info">Enum</span>
+                    {{else}}
+                        <span class="ink-label warning">Class</span>
+                    {{/isEnum}}
+                    {{name}} </dt>
+
+                    {{#if superClass}}
+                    <dd>superclass : <a href="#{{superClass}}">{{superClass}}</a></dd>
+                    {{/if}}
+                    </dl>
+                    {{/each}}
+                 </section>
                 </div>
             </div>
         </div>

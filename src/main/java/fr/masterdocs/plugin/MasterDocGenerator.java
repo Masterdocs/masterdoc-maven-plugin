@@ -1,8 +1,6 @@
 package fr.masterdocs.plugin;
 
-import com.github.jknack.handlebars.Context;
-import com.github.jknack.handlebars.Handlebars;
-import com.github.jknack.handlebars.Template;
+import com.github.jknack.handlebars.*;
 import com.github.jknack.handlebars.io.FileTemplateLoader;
 import com.googlecode.gentyref.GenericTypeReflector;
 import fr.masterdocs.pojo.*;
@@ -212,7 +210,7 @@ public class MasterDocGenerator {
 					newEntity.setFields(extractFields(entity));
 					final Class<?> superclass = entityClass.getSuperclass();
 					if (!JAVA_LANG_OBJECT.equals(superclass.getName())) {
-						newEntity.setSuperClass(superclass);
+						newEntity.setSuperClass(superclass.getName());
 						if (!entityList.contains(superclass.getName()) && !newEntities.contains(superclass.getName())) {
 							newEntities.add(superclass.getName());
 						}
@@ -694,12 +692,7 @@ public class MasterDocGenerator {
 
 				}
 				String handlebarsTemplate = pathToGenerateFile + separator + MASTERDOCS_DIR + separator;
-				final String newIndex = handleBarsApply(masterDoc, handlebarsTemplate);
-				File indexFile = new File(handlebarsTemplate + "index.html");
-				FileWriter fw = new FileWriter(indexFile.getAbsoluteFile());
-				BufferedWriter bw = new BufferedWriter(fw);
-				bw.write(newIndex);
-				bw.close();
+				handleBarsApply(masterDoc, handlebarsTemplate);
 
 				consoleLogger.info(format("HTMLSite generate in {0}", pathToGenerateFile));
 			}
@@ -711,8 +704,23 @@ public class MasterDocGenerator {
 	protected String handleBarsApply(MasterDoc masterDoc, String handlebarsTemplate) throws IOException {
 		final FileTemplateLoader fileTemplateLoader = new FileTemplateLoader(handlebarsTemplate);
 		Handlebars handlebars = new Handlebars(fileTemplateLoader);
+		handlebars.registerHelper("isEnum", new Helper<AbstractEntity>() {
+			@Override
+			public CharSequence apply(AbstractEntity abstractEntity, Options options) throws IOException {
+				if (abstractEntity instanceof Enumeration)
+					return options.fn();
+				else
+					return options.inverse();
+			}
+		});
 		Template template = handlebars.compile("index");
 		Context ctx = Context.newContext(masterDoc);
-		return template.apply(ctx);
+		String newIndex = template.apply(ctx);
+		File indexFile = new File(handlebarsTemplate + "index.html");
+		FileWriter fw = new FileWriter(indexFile.getAbsoluteFile());
+		BufferedWriter bw = new BufferedWriter(fw);
+		bw.write(newIndex);
+		bw.close();
+		return newIndex;
 	}
 }
