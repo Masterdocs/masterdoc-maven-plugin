@@ -18,6 +18,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlTransient;
 
@@ -505,9 +506,7 @@ public class MasterDocGenerator {
         ParameterizedType paramType = (ParameterizedType) types[i];
         typeName = extractTypeFromType(paramType);
       }
-      if (pAnnot[i].length == 0) {
-        resourceEntry.setRequestEntity(typeName);
-      }
+      boolean isAParam = false;
       for (int j = 0; j < pAnnot[i].length; j++) {
         Annotation annotation = pAnnot[i][j];
         if (annotation instanceof PathParam) {
@@ -516,6 +515,7 @@ public class MasterDocGenerator {
           param.setClassName(typeName);
           param.setName(((PathParam) annotation).value());
           resourceEntry.getPathParams().add(param);
+          isAParam = true;
         }
         if (annotation instanceof QueryParam) {
           Param param = new Param();
@@ -523,7 +523,14 @@ public class MasterDocGenerator {
           param.setClassName(typeName);
           param.setName(((QueryParam) annotation).value());
           resourceEntry.getQueryParams().add(param);
+          isAParam = true;
         }
+        if (annotation instanceof Context) {
+          isAParam = true;
+        }
+      }
+      if (!isAParam) {
+        resourceEntry.setRequestEntity(typeName);
       }
     }
 
