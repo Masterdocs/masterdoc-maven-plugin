@@ -428,10 +428,10 @@ public class MasterDocGenerator {
     AbstractEntity field;
     if (null != currEntityClass && currEntityClass.isEnum()) {
       field = new Enumeration();
-      field.setName(extractName(typeDisplay));
+      field.setName(typeDisplay);
     } else {
       field = new Entity();
-      field.setName(extractName(typeDisplay));
+      field.setName(typeDisplay);
     }
     fields.put(name, field);
   }
