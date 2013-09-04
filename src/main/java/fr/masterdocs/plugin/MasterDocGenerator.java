@@ -391,24 +391,38 @@ public class MasterDocGenerator {
           type = type.substring(type.indexOf("<") + 1, type.indexOf(">"));
         }
         String[] types = type.split(COMMA);
-        try {
-          entityClass.getDeclaredMethod(GET_PREFIX + capitalize(declaredField.getName())); // GET OR IS
+        if (isGetterSetterExist(entityClass, declaredField.getName())) {
           createEntityFromField(fields, declaredField, typeDisplay, types, null != name ? name : declaredField.getName());
-
-        } catch (NoSuchMethodException e) {
-          try {
-            entityClass.getDeclaredMethod(IS_PREFIX
-                + capitalize(declaredField.getName())); // GET OR IS
-            createEntityFromField(fields, declaredField, typeDisplay, types, null != name ? name : declaredField.getName());
-
-          } catch (NoSuchMethodException ex) {
-            consoleLogger.debug(format(">>>>Bypass : {0}.{1}", entityClass.toString(), declaredField.getName()));
-          }
-
         }
       }
     }
     return fields;
+  }
+
+  private boolean isGetterSetterExist(Class<?> entityClass, String name) {
+    try {
+      entityClass.getDeclaredMethod(GET_PREFIX + capitalize(name)); // GET OR IS
+      return true;
+    } catch (NoSuchMethodException e) {
+      try {
+        entityClass.getDeclaredMethod(IS_PREFIX + capitalize(name)); // GET OR IS
+        return true;
+      } catch (NoSuchMethodException ex) {
+        try {
+          entityClass.getDeclaredMethod(GET_PREFIX + name); // GET OR IS
+          return true;
+        } catch (NoSuchMethodException exe) {
+          try {
+            entityClass.getDeclaredMethod(IS_PREFIX + name); // GET OR IS
+            return true;
+          } catch (NoSuchMethodException exec) {
+          }
+        }
+        consoleLogger.debug(format(">>>>Bypass : {0}.{1}", entityClass.toString(), name));
+      }
+
+    }
+    return false;
   }
 
   private void createEntityFromField(Map<String, AbstractEntity> fields, Field declaredField, String typeDisplay, String[] types, String name) {
@@ -783,6 +797,13 @@ public class MasterDocGenerator {
       @Override
       public CharSequence apply(AbstractEntity abstractEntity, Options options) throws IOException {
         return abstractEntity.getName().substring(abstractEntity.getName().lastIndexOf(DOT) + 1);
+      }
+    });
+
+    handlebars.registerHelper("extractSuperclass", new Helper<AbstractEntity>() {
+      @Override
+      public CharSequence apply(AbstractEntity abstractEntity, Options options) throws IOException {
+        return ((Entity) abstractEntity).getSuperClass().substring(((Entity) abstractEntity).getSuperClass().lastIndexOf(DOT) + 1);
       }
     });
 
