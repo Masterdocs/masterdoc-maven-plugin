@@ -21,7 +21,6 @@ import java.util.zip.ZipFile;
 
 import javax.ws.rs.*;
 import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlTransient;
 
 import org.apache.camel.Consume;
 import org.apache.maven.artifact.Artifact;
@@ -95,12 +94,12 @@ public class MasterDocGenerator {
    * Final MasterDoc.
    */
   private MasterDoc                    masterDoc;
-  private Set<Serializable>            entityList;
+  private Set<String>                  entityList;
   private MavenProject                 project;
   private ClassLoader                  originalClassLoader     = Thread.currentThread().getContextClassLoader();
   private ClassLoader                  newClassLoader;
   private String                       pathToGenerateFile;
-  private HashSet<Serializable>        newEntities;
+  private HashSet<String>              newEntities;
 
   // ----------------------------------------------------------------------
   // Constructors
@@ -118,7 +117,7 @@ public class MasterDocGenerator {
     consoleLogger.info("MasterDocGenerator started");
     resources = new ArrayList<Resource>();
     entities = new ArrayList<AbstractEntity>();
-    entityList = new HashSet<Serializable>();
+    entityList = new HashSet<String>();
     this.project = project;
     this.pathToGenerateFile = pathToGenerateFile;
     // ////////////////////
@@ -194,7 +193,7 @@ public class MasterDocGenerator {
   private void getEntities(Set list) throws ClassNotFoundException,
       IntrospectionException {
 
-    newEntities = new HashSet<Serializable>();
+    newEntities = new HashSet<String>();
     for (Iterator<Serializable> iterator = list.iterator(); iterator
         .hasNext();) {
       Serializable entity = iterator.next();
@@ -208,7 +207,7 @@ public class MasterDocGenerator {
       Entity newEntity = new Entity();
       if (!entity.toString().startsWith(JAVA)) {
 
-        newEntity.setName(extractName(entity.toString()));
+        newEntity.setName(entity.toString());
 
         if (entityClass.isEnum()) {
           extractEnumFields(entity);
@@ -360,7 +359,7 @@ public class MasterDocGenerator {
       boolean bypass = false;
       String name = null;
       for (Annotation annotation : declaredAnnotations) {
-        if (annotation instanceof JsonIgnore || annotation instanceof XmlTransient) {
+        if (annotation instanceof JsonIgnore) {
           bypass = true;
         }
         if (annotation instanceof XmlElement) {
@@ -592,6 +591,9 @@ public class MasterDocGenerator {
       if (!isAParam) {
         resourceEntry.setRequestEntity(typeName);
       }
+      if (!entityList.contains(typeName)) {
+        entityList.add(typeName);
+      }
     }
 
     if (null != childResourceClass) {
@@ -686,6 +688,7 @@ public class MasterDocGenerator {
         nameOrdering).addAll(entities).build();
     masterDoc.setEntities(sortedEntities.asList());
     Function<Resource, String> getPathFunction = new
+
         Function<Resource, String>() {
           public String apply(Resource from) {
             return from.getRootPath();

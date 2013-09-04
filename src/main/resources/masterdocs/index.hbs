@@ -110,15 +110,15 @@
                     <dl id="{{name}}" class="box">
                     <dt>
                     {{#isEnum}}
-                        <span class="ink-label info">Enum</span>
+                        <span class="ink-label info">E</span>
                     {{else}}
-                        <span class="ink-label warning">Class</span>
+                        <span class="ink-label warning">C</span>
                     {{/isEnum}}
                     {{extractName this name}} <button class="toggle" data-target="#{{extractName this name}}-toggle"> <i class="icon-collapse
  icon-medium"></i> details </button></dt>
                      <div id="{{extractName this name}}-toggle" class="hide-all">
                         {{#if superClass}}
-                        <dd>superclass : <a href="#{{superClass}}">{{superClass}}</a></dd>
+                        <dd>superclass : <a href="#{{extractName this superClass}}">{{extractName this superClass}}</a></dd>
                         {{/if}}
                         <dd>
                             <ul class="unstyled">
@@ -129,7 +129,7 @@
                             {{else}}
                                 <span class="ink-label warning">C</span>
                             {{/isEnum}}
-                            Name : {{@key}} - Type : {{this.name}}</li>
+                            Name : {{@key}} - Type : <a href="#{{this.name}}">{{this.name}}</a></li>
                             {{/each}}
                             {{#each values}}
                                 <li>{{this}}</li>
