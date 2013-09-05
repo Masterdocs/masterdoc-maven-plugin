@@ -254,7 +254,7 @@ public class MasterDocGenerator {
     Reflections reflections = new Reflections(packageDocumentationResource);
     Set<Class<?>> reflectionResources = reflections
         .getTypesAnnotatedWith(Path.class);
-    consoleLogger.info(format("Ressources : {0}", reflectionResources));
+    consoleLogger.info(format("Resources : {0}", reflectionResources));
     for (Iterator<Class<?>> iterator = reflectionResources.iterator(); iterator
         .hasNext();) {
       Class<?> resource = iterator.next();
@@ -269,7 +269,11 @@ public class MasterDocGenerator {
         for (int i = 0; i < annotations.length; i++) {
           Annotation annotation = annotations[i];
           if (annotation instanceof Path) {
-            res.setRootPath(((Path) annotation).value());
+            String rootPath = ((Path) annotation).value();
+            if (null != rootPath && !rootPath.endsWith("/")) {
+              rootPath = rootPath + "/";
+            }
+            res.setRootPath(rootPath);
           }
           if (annotation instanceof Produces) {
             mediaTypeProduces = ((Produces) annotation).value()[0];
@@ -292,8 +296,11 @@ public class MasterDocGenerator {
                 superclassDeclaredMethod, mediaTypeConsumes,
                 mediaTypeProduces, resource);
             if (null != resourceEntry) {
-              resourceEntry.setFullPath(res.getRootPath() + "/"
-                  + resourceEntry.getPath());
+              String path = resourceEntry.getPath();
+              if (null != path && path.startsWith("/")) {
+                path = path.substring(1);
+              }
+              resourceEntry.setFullPath(res.getRootPath() + path);
               res.getEntryList().put(
                   resourceEntry.calculateUniqKey(),
                   resourceEntry);
@@ -311,8 +318,11 @@ public class MasterDocGenerator {
               res.getEntryList().remove(
                   resourceEntry.calculateUniqKey());
             }
-            resourceEntry.setFullPath(res.getRootPath() + "/"
-                + resourceEntry.getPath());
+            String path = resourceEntry.getPath();
+            if (null != path && path.startsWith("/")) {
+              path = path.substring(1);
+            }
+            resourceEntry.setFullPath(res.getRootPath() + path);
             res.getEntryList()
                 .put(resourceEntry.calculateUniqKey(),
                     resourceEntry);
@@ -523,7 +533,11 @@ public class MasterDocGenerator {
     for (int i = 0; i < declaredAnnotations.length; i++) {
       Annotation declaredAnnotation = declaredAnnotations[i];
       if (declaredAnnotation instanceof Path) {
-        resourceEntry.setPath(((Path) declaredAnnotation).value());
+        String path = ((Path) declaredAnnotation).value();
+        if (null != path && !path.startsWith("/")) {
+          path = "/" + path;
+        }
+        resourceEntry.setPath(path);
       }
       if (declaredAnnotation instanceof Produces) {
         resourceEntry
@@ -686,7 +700,6 @@ public class MasterDocGenerator {
     MasterDoc masterDoc = new MasterDoc();
     Function<AbstractEntity, String> getNameFunction = new Function<AbstractEntity, String>() {
       public String apply(AbstractEntity from) {
-        String name = from.getName();
         return extractName(from.getName());
       }
     };
