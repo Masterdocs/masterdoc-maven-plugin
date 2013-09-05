@@ -471,7 +471,7 @@ public class MasterDocGenerator {
     final Class<?> entityClass = Class.forName(entityString, true, newClassLoader);
     final Object[] declaredEnumConstants = entityClass.getEnumConstants();
     Enumeration newEnumeration = new Enumeration();
-    newEnumeration.setName(extractName(entityString));
+    newEnumeration.setName(entityString);
     for (int i = 0; i < declaredEnumConstants.length; i++) {
       values.add(declaredEnumConstants[i].toString());
     }
@@ -686,13 +686,7 @@ public class MasterDocGenerator {
     Function<AbstractEntity, String> getNameFunction = new Function<AbstractEntity, String>() {
       public String apply(AbstractEntity from) {
         String name = from.getName();
-
-        final int lastIndexOfDOT = name.lastIndexOf(DOT);
-        if (lastIndexOfDOT > 0) {
-          return name.substring(lastIndexOfDOT);
-        } else {
-          return name;
-        }
+        return extractName(from.getName());
       }
     };
 
@@ -796,7 +790,26 @@ public class MasterDocGenerator {
     handlebars.registerHelper("extractName", new Helper<AbstractEntity>() {
       @Override
       public CharSequence apply(AbstractEntity abstractEntity, Options options) throws IOException {
-        return abstractEntity.getName().substring(abstractEntity.getName().lastIndexOf(DOT) + 1);
+        final String name = abstractEntity.getName();
+        final String[] split = name.split("<");
+        boolean first = true;
+        StringBuilder sb = new StringBuilder();
+        for (String part : split) {
+          sb.append(part.substring(part.lastIndexOf(DOT) + 1));
+          if (first && split.length > 1) {
+            sb.append("<");
+          }
+          first = false;
+        }
+        return sb.toString();
+      }
+    });
+
+    handlebars.registerHelper("extractLink", new Helper<AbstractEntity>() {
+      @Override
+      public CharSequence apply(AbstractEntity abstractEntity, Options options) throws IOException {
+        final String name = abstractEntity.getName();
+        return name;
       }
     });
 
