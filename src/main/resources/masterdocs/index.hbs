@@ -121,7 +121,8 @@
                     <ul id="{{generateResID this}}-toggle" class="hide-all unstyled">
                         {{#each entryList}}
                         <li><span class="toggle clickable ink-label {{getLabelColor this}}"
-                                  data-target="#{{generateResEntryID this}}-toggle">{{this.verb}}</span> {{this.path}}
+                                  data-target="#{{generateResEntryID this}}-toggle">{{this.verb}}</span> {{{decorate
+                            this.path}}}
                             <div id="{{generateResEntryID this}}-toggle" class="hide-all">
                                 Params :
                                 <ul class="unstyled">
@@ -133,12 +134,12 @@
                                     {{/each}}
                                     {{#each pathParams}}
                                     <li>
-                                        <span class="ink-label success">PathParam</span>
-                                        {{this.name}} ({{extractName this.className}})
+                                        <span class="ink-label success invert">{{this.name}}</span> ({{extractName
+                                        this.className}})
                                     </li>
                                     {{/each}}
                                 </ul>
-                                Entity :
+                                Entities :
                                 <ul class="unstyled">
                                     <li>RequestEntity :
                                         {{#if this.requestEntity}}

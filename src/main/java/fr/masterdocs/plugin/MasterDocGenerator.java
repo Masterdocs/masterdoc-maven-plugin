@@ -814,28 +814,12 @@ public class MasterDocGenerator {
       }
     });
 
-    /*
-     * handlebars.registerHelper("extractName", new Helper<AbstractEntity>() {
-     * @Override public CharSequence apply(AbstractEntity abstractEntity, Options options) throws IOException { final String name = abstractEntity.getName();
-     * return extractNameFromFQN(name); } }); handlebars.registerHelper("extractClassName", new Helper<Param>() {
-     * @Override public CharSequence apply(Param param, Options options) throws IOException { final String name = param.getName(); return
-     * extractNameFromFQN(name); } });
-     */
-
     handlebars.registerHelper("extractName", new Helper<String>() {
       @Override
       public CharSequence apply(String context, Options options) throws IOException {
         return extractNameFromFQN(context);
       }
     });
-
-    /*
-     * handlebars.registerHelper("extractLink", new Helper<AbstractEntity>() {
-     * @Override public CharSequence apply(AbstractEntity abstractEntity, Options options) throws IOException { final String name = abstractEntity.getName();
-     * return name; } }); handlebars.registerHelper("extractSuperclass", new Helper<AbstractEntity>() {
-     * @Override public CharSequence apply(AbstractEntity abstractEntity, Options options) throws IOException { return ((Entity)
-     * abstractEntity).getSuperClass().substring(((Entity) abstractEntity).getSuperClass().lastIndexOf(DOT) + 1); } });
-     */
 
     handlebars.registerHelper("generateResID", new Helper<Resource>() {
       @Override
@@ -844,12 +828,20 @@ public class MasterDocGenerator {
       }
     });
 
+    handlebars.registerHelper("decorate", new Helper<String>() {
+      @Override
+      public CharSequence apply(String context, Options options) throws IOException {
+        return context.replaceAll("\\{", "<span class=\"ink-label success success invert\">{").replaceAll("}", "}</span>");
+      }
+    });
+
     handlebars.registerHelper("generateResEntryID", new Helper<ResourceEntry>() {
       @Override
       public CharSequence apply(ResourceEntry context, Options options) throws IOException {
-        return (context.getFullPath() + context.calculateUniqKey()).replaceAll("<<", "").replaceAll("/", "").replaceAll("}", "").replaceAll(":", "")
+        return new Handlebars.SafeString((context.getFullPath() + context.calculateUniqKey()).replaceAll("<<", "").replaceAll("/", "").replaceAll("}", "")
+            .replaceAll(":", "")
             .replaceAll("\\+", "")
-            .replaceAll("\\{", "").replaceAll("\\\\", "");
+            .replaceAll("\\{", "").replaceAll("\\\\", ""));
       }
     });
 
