@@ -469,11 +469,12 @@ public class MasterDocGenerator {
     }
     consoleLogger.debug(">>>Extract enum " + entityString + " ...");
     final Class<?> entityClass = Class.forName(entityString, true, newClassLoader);
-    final Object[] declaredEnumConstants = entityClass.getEnumConstants();
+    final Object[] declaredEnumConstants = entityClass.getFields();
+    // final Object[] declaredEnumConstants = entityClass.getEnumConstants();
     Enumeration newEnumeration = new Enumeration();
     newEnumeration.setName(entityString);
     for (int i = 0; i < declaredEnumConstants.length; i++) {
-      values.add(declaredEnumConstants[i].toString());
+      values.add(extractName(declaredEnumConstants[i].toString()));
     }
     newEnumeration.setValues(values);
     // do not add an enum if its already in the entities list
