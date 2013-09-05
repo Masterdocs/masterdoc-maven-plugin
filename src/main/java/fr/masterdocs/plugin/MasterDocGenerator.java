@@ -220,9 +220,7 @@ public class MasterDocGenerator {
               newEntities.add(superclass.getName());
             }
           }
-          if (newEntity.getFields().size() > 0 || null != newEntity.getSuperClass()) {
-            entities.add(newEntity);
-          }
+          entities.add(newEntity);
         }
       }
     }
@@ -838,6 +836,13 @@ public class MasterDocGenerator {
       @Override
       public CharSequence apply(Resource context, Options options) throws IOException {
         return context.getRootPath().replaceAll("/", "_");
+      }
+    });
+
+    handlebars.registerHelper("generateResEntryID", new Helper<ResourceEntry>() {
+      @Override
+      public CharSequence apply(ResourceEntry context, Options options) throws IOException {
+        return context.calculateUniqKey().replaceAll("<<", "_").replaceAll("/", "_");
       }
     });
 
