@@ -814,38 +814,28 @@ public class MasterDocGenerator {
       }
     });
 
-    handlebars.registerHelper("extractName", new Helper<AbstractEntity>() {
+    /*
+     * handlebars.registerHelper("extractName", new Helper<AbstractEntity>() {
+     * @Override public CharSequence apply(AbstractEntity abstractEntity, Options options) throws IOException { final String name = abstractEntity.getName();
+     * return extractNameFromFQN(name); } }); handlebars.registerHelper("extractClassName", new Helper<Param>() {
+     * @Override public CharSequence apply(Param param, Options options) throws IOException { final String name = param.getName(); return
+     * extractNameFromFQN(name); } });
+     */
+
+    handlebars.registerHelper("extractName", new Helper<String>() {
       @Override
-      public CharSequence apply(AbstractEntity abstractEntity, Options options) throws IOException {
-        final String name = abstractEntity.getName();
-        final String[] split = name.split("<");
-        boolean first = true;
-        StringBuilder sb = new StringBuilder();
-        for (String part : split) {
-          sb.append(part.substring(part.lastIndexOf(DOT) + 1));
-          if (first && split.length > 1) {
-            sb.append("<");
-          }
-          first = false;
-        }
-        return sb.toString();
+      public CharSequence apply(String context, Options options) throws IOException {
+        return extractNameFromFQN(context);
       }
     });
 
-    handlebars.registerHelper("extractLink", new Helper<AbstractEntity>() {
-      @Override
-      public CharSequence apply(AbstractEntity abstractEntity, Options options) throws IOException {
-        final String name = abstractEntity.getName();
-        return name;
-      }
-    });
-
-    handlebars.registerHelper("extractSuperclass", new Helper<AbstractEntity>() {
-      @Override
-      public CharSequence apply(AbstractEntity abstractEntity, Options options) throws IOException {
-        return ((Entity) abstractEntity).getSuperClass().substring(((Entity) abstractEntity).getSuperClass().lastIndexOf(DOT) + 1);
-      }
-    });
+    /*
+     * handlebars.registerHelper("extractLink", new Helper<AbstractEntity>() {
+     * @Override public CharSequence apply(AbstractEntity abstractEntity, Options options) throws IOException { final String name = abstractEntity.getName();
+     * return name; } }); handlebars.registerHelper("extractSuperclass", new Helper<AbstractEntity>() {
+     * @Override public CharSequence apply(AbstractEntity abstractEntity, Options options) throws IOException { return ((Entity)
+     * abstractEntity).getSuperClass().substring(((Entity) abstractEntity).getSuperClass().lastIndexOf(DOT) + 1); } });
+     */
 
     handlebars.registerHelper("generateResID", new Helper<Resource>() {
       @Override
@@ -871,5 +861,19 @@ public class MasterDocGenerator {
     bw.write(newIndex);
     bw.close();
     return newIndex;
+  }
+
+  private CharSequence extractNameFromFQN(String name) {
+    final String[] split = name.split("<");
+    boolean first = true;
+    StringBuilder sb = new StringBuilder();
+    for (String part : split) {
+      sb.append(part.substring(part.lastIndexOf(DOT) + 1));
+      if (first && split.length > 1) {
+        sb.append("<");
+      }
+      first = false;
+    }
+    return sb.toString();
   }
 }
