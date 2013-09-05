@@ -616,6 +616,17 @@ public class MasterDocGenerator {
         }
       }
       if (!isAParam) {
+        if (typeName.startsWith("[")) {
+          if (typeName.startsWith("[L") && typeName.endsWith(";")) {
+            typeName = typeName.substring(2, typeName.length() - 1);
+          } else {
+            typeName = typeName.substring(1);
+            if (BYTE.equals(typeName)) {
+              typeName = byte.class.getName();
+            }
+          }
+        }
+        typeName = typeName + ARRAY;
         resourceEntry.setRequestEntity(typeName);
       }
       if (!entityList.contains(typeName)) {
