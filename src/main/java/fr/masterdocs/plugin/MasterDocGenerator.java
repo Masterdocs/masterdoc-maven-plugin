@@ -220,7 +220,11 @@ public class MasterDocGenerator {
               newEntities.add(superclass.getName());
             }
           }
+          if (newEntity.getFields().isEmpty()) {
+            newEntity.setFields(null);
+          }
           entities.add(newEntity);
+
         }
       }
     }
@@ -853,7 +857,7 @@ public class MasterDocGenerator {
     handlebars.registerHelper("generateResEntryID", new Helper<ResourceEntry>() {
       @Override
       public CharSequence apply(ResourceEntry context, Options options) throws IOException {
-        return context.calculateUniqKey().replaceAll("<<", "_").replaceAll("/", "_");
+        return context.calculateUniqKey().replaceAll("<<", "_").replaceAll("/", "_").replaceAll("}", "_").replaceAll("\\{", "_");
       }
     });
 

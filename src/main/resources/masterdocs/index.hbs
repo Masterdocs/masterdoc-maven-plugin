@@ -120,10 +120,10 @@
                     </dt>
                     <ul id="{{generateResID this}}-toggle" class="hide-all unstyled">
                         {{#each entryList}}
-                        <li><span class="toggle clickable ink-label {{getLabelColor this}}"
+                        <!--<li><span class="toggle clickable ink-label {{getLabelColor this}}"
                                   data-target="#{{generateResEntryID this}}-toggle">{{this.verb}}</span> {{this.path}}
                             <div id="{{generateResEntryID this}}-toggle" class="hide-all">{{this.fullPath}}</div>
-                        </li>
+                        </li>-->
                         {{/each}}
                     </ul>
                 </dl>
@@ -150,7 +150,9 @@
                         <dd>superclass : <a href="#{{superClass}}">{{extractSuperclass this}}</a></dd>
                         {{/if}}
                         <dd>
+
                             <ul class="unstyled">
+                                {{#if fields}}
                                 {{#each fields}}
                                 <li>
                                     {{#isEnum}}
@@ -161,9 +163,18 @@
                                     Name : {{@key}} - Type : <a href="#{{extractLink this}}">{{extractName this}}</a>
                                 </li>
                                 {{/each}}
+                                {{else}}
+                                {{#if values}}
                                 {{#each values}}
                                 <li><i class="icon-circle"></i> {{this}}</li>
                                 {{/each}}
+                                {{else}}
+                                <div class="ink-alert basic warning">
+                                    <p>No field for this entity</p>
+                                </div>
+
+                                {{/if}}
+                                {{/if}}
                             </ul>
                         </dd>
                     </div>
