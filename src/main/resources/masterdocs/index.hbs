@@ -93,8 +93,9 @@
                     <h2>Resources</h2>
                     {{#each resources}}
                     <dl id="{{rootPath}}" class="box">
-                        <dt>{{rootPath}}</dt>
-                        <ul class="unstyled">
+                        <dt>{{rootPath}} <button class="toggle" data-target="#{{generateResID this}}-toggle"> <i class="icon-collapse
+                                          icon-medium"></i> details </button></dt>
+                        <ul id="{{generateResID this}}-toggle" class="hide-all unstyled">
                         {{#each entryList}}
                         <li><span class="ink-label {{getLabelColor this}}">{{this.verb}}</span> {{this.path}}</li>
                         {{/each}}

@@ -834,6 +834,13 @@ public class MasterDocGenerator {
       }
     });
 
+    handlebars.registerHelper("generateResID", new Helper<Resource>() {
+      @Override
+      public CharSequence apply(Resource context, Options options) throws IOException {
+        return context.getRootPath().replaceAll("/", "_");
+      }
+    });
+
     Template template = handlebars.compile("index");
     Context ctx = Context.newContext(masterDoc);
     String newIndex = template.apply(ctx);
