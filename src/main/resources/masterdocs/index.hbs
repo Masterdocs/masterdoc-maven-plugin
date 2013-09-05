@@ -33,8 +33,7 @@
         <script type="text/javascript" src="./js/html5shiv.js"></script>
 
         <script type="text/javascript" src="./js/ink.toggle.js"></script>
-        <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
-        
+
         <style type="text/css">
         body {
             background: #ededed;
@@ -76,7 +75,7 @@
         <div class="ink-grid">
             <header>
                 <h1 id="header" class="pull-left medium-100 small-100">
-                    <img src="./img/masterdocs.png" style="width:128px;vertical-align:middle"/>MasterDocs for {{metadata.artifactId}}<small>Version {{metadata.version}}</small>
+                    <img src="./img/masterdocs.png" style="width:128px;vertical-align:middle"/>MasterDocs for {{metadata.artifactId}}<small class="tooltip" data-tip-text="{{metadata.groupId}}.{{metadata.artifactId}}.{{metadata.version}}" data-tip-where="down">Version {{metadata.version}}</small>
                 </h1>
             </header>
             <div class="column-group gutters">
