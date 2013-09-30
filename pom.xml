@@ -24,7 +24,7 @@
         </developer>
     </developers>
 
-    <name>Masterdoc plugin</name>
+    <name>Masterdocs maven plugin</name>
     <description>Generate the REST documentation</description>
 
     <scm>
