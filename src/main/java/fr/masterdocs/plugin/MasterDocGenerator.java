@@ -313,7 +313,7 @@ public class MasterDocGenerator {
           Method declaredMethod = declaredMethods[i];
           ResourceEntry resourceEntry = createResourceEntryFromMethod(
               declaredMethod, mediaTypeConsumes,
-              mediaTypeProduces, null);
+              mediaTypeProduces, resource);
           if (null != resourceEntry) {
             if (res.getEntryList().containsKey(
                 resourceEntry.calculateUniqKey())) {
@@ -590,7 +590,13 @@ public class MasterDocGenerator {
 
     Annotation[][] pAnnot = declaredMethod.getParameterAnnotations();
     for (int i = 0; i < pType.length; i++) {
-      String typeName = ((Class) pType[i]).getName();
+
+      String typeName = "";
+      if (pType[i] instanceof Class) {
+        typeName = ((Class) pType[i]).getName();
+      } else {
+        typeName = extractTypeFromType(((ParameterizedType) pType[i]));
+      }
       if (JAVA_UTIL_HASH_MAP.equals(typeName)) {
         Type[] types = declaredMethod.getGenericParameterTypes();
         ParameterizedType paramType = (ParameterizedType) types[i];
@@ -629,8 +635,8 @@ public class MasterDocGenerator {
               typeName = byte.class.getName();
             }
           }
+          typeName = typeName + ARRAY;
         }
-        typeName = typeName + ARRAY;
         resourceEntry.setRequestEntity(typeName);
       }
       if (!entityList.contains(typeName)) {
@@ -648,6 +654,7 @@ public class MasterDocGenerator {
           .getGenericReturnType()));
     }
 
+    resourceEntry.setMethodeName(declaredMethod.getName());
     return resourceEntry;
   }
 
