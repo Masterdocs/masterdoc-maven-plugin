@@ -83,6 +83,15 @@
         .clickable {
             cursor: pointer;
         }
+
+        .verbContainer {
+            float: right;
+            display: inline-block;
+        }
+
+        .entryListRow:hover {
+            background-color: #fefbd6;;
+        }
     </style>
 </head>
 
@@ -120,44 +129,12 @@
                     </dt>
                     <ul id="{{generateResID this}}-toggle" class="hide-all unstyled">
                         {{#each entryList}}
-                        <li><span class="toggle clickable ink-label {{getLabelColor this}}"
-                                  data-target="#{{generateResEntryID this}}-toggle">{{this.verb}}</span> {{{decorate
-                            this.path}}}
-                            <div id="{{generateResEntryID this}}-toggle" class="hide-all">
-                                Params :
-                                <ul class="unstyled">
-                                    {{#each queryParams}}
-                                    <li>
-                                        <span class="ink-label info">QueryParam</span>
-                                        {{this.name}} ({{extractName this.className}})
-                                    </li>
-                                    {{/each}}
-                                    {{#each pathParams}}
-                                    <li>
-                                        <span class="ink-label success invert">{{this.name}}</span> ({{extractName
-                                        this.className}})
-                                    </li>
-                                    {{/each}}
-                                </ul>
-                                Entities :
-                                <ul class="unstyled">
-                                    <li>RequestEntity :
-                                        {{#if this.requestEntity}}
-                                        {{extractName this.requestEntity}}
-                                        {{else}}
-                                        None
-                                        {{/if}}
-                                    </li>
-                                    <li>ResponseEntity :
-                                        {{#if this.responseEntity}}
-                                        {{extractName this.responseEntity}}
-                                        {{else}}
-                                        None
-                                        {{/if}}
-                                    </li>
-                                </ul>
-
-                            </div>
+                        <li class="entryListRow">{{{decorate @key}}}
+                                <span class="verbContainer">
+                            {{#each this}}
+                                <span class="clickable ink-label {{getLabelColor this}}">{{verb}}</span>
+                            {{/each}}
+                                </span>
                         </li>
                         {{/each}}
                     </ul>

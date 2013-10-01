@@ -266,7 +266,7 @@ public class MasterDocGenerator {
         Annotation[] annotations = resource.getAnnotations();
         Method[] declaredMethods = resource.getDeclaredMethods();
 
-        res.setEntryList(new TreeMap<String, ResourceEntry>());
+        res.setEntryList(new TreeMap<String, List<ResourceEntry>>());
         // Annotations for resource
         for (int i = 0; i < annotations.length; i++) {
           Annotation annotation = annotations[i];
@@ -303,9 +303,12 @@ public class MasterDocGenerator {
                 path = path.substring(1);
               }
               resourceEntry.setFullPath(res.getRootPath() + path);
-              res.getEntryList().put(
-                  resourceEntry.calculateUniqKey(),
-                  resourceEntry);
+              if (!res.getEntryList().containsKey(resourceEntry.getFullPath())) {
+                res.getEntryList().put(resourceEntry.getFullPath(), new ArrayList<ResourceEntry>());
+              }
+              List<ResourceEntry> resourceEntries = res.getEntryList().get(resourceEntry.getFullPath());
+              resourceEntries.add(resourceEntry);
+              res.getEntryList().put(resourceEntry.getFullPath(), resourceEntries);
             }
           }
         }
@@ -325,9 +328,12 @@ public class MasterDocGenerator {
               path = path.substring(1);
             }
             resourceEntry.setFullPath(res.getRootPath() + path);
-            res.getEntryList()
-                .put(resourceEntry.calculateUniqKey(),
-                    resourceEntry);
+            if (!res.getEntryList().containsKey(resourceEntry.getFullPath())) {
+              res.getEntryList().put(resourceEntry.getFullPath(), new ArrayList<ResourceEntry>());
+            }
+            List<ResourceEntry> resourceEntries = res.getEntryList().get(resourceEntry.getFullPath());
+            resourceEntries.add(resourceEntry);
+            res.getEntryList().put(resourceEntry.getFullPath(), resourceEntries);
           }
         }
 
@@ -497,20 +503,22 @@ public class MasterDocGenerator {
   }
 
   private void extractEntityFromResourceEntries(Resource res) {
-    Map<String, ResourceEntry> entryList = res.getEntryList();
+    Map<String, List<ResourceEntry>> entryList = res.getEntryList();
     Set<String> set = entryList.keySet();
     for (Iterator<String> iterator = set.iterator(); iterator.hasNext();) {
       String key = iterator.next();
-      ResourceEntry resourceEntry = entryList.get(key);
-      Serializable requestEntity = resourceEntry.getRequestEntity();
-      Serializable responseEntity = resourceEntry.getResponseEntity();
-      if (null != requestEntity && !NULL.equals(requestEntity)
-          && !VOID.equals(requestEntity)) {
-        entityList.add(removeList(requestEntity));
-      }
-      if (null != responseEntity && !NULL.equals(responseEntity)
-          && !VOID.equals(responseEntity)) {
-        entityList.add(removeList(responseEntity));
+      List<ResourceEntry> resourceEntries = entryList.get(key);
+      for (ResourceEntry resourceEntry : resourceEntries) {
+        Serializable requestEntity = resourceEntry.getRequestEntity();
+        Serializable responseEntity = resourceEntry.getResponseEntity();
+        if (null != requestEntity && !NULL.equals(requestEntity)
+            && !VOID.equals(requestEntity)) {
+          entityList.add(removeList(requestEntity));
+        }
+        if (null != responseEntity && !NULL.equals(responseEntity)
+            && !VOID.equals(responseEntity)) {
+          entityList.add(removeList(responseEntity));
+        }
       }
     }
   }
