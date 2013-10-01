@@ -662,7 +662,7 @@ public class MasterDocGenerator {
           .getGenericReturnType()));
     }
 
-    resourceEntry.setMethodeName(declaredMethod.getName());
+    resourceEntry.setMethodName(declaredMethod.getName());
     return resourceEntry;
   }
 
@@ -840,6 +840,13 @@ public class MasterDocGenerator {
       @Override
       public CharSequence apply(Resource context, Options options) throws IOException {
         return context.getRootPath().replaceAll("/", "_");
+      }
+    });
+
+    handlebars.registerHelper("generateResEntryID", new Helper<ResourceEntry>() {
+      @Override
+      public CharSequence apply(ResourceEntry context, Options options) throws IOException {
+        return context.calculateUniqKey();
       }
     });
 

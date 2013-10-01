@@ -29,6 +29,7 @@
     <script type="text/javascript" src="./js/holder.js"></script>
     <script type="text/javascript" src="./js/ink.min.js"></script>
     <script type="text/javascript" src="./js/ink-ui.min.js"></script>
+    <script type="text/javascript" src="./js/ink.modal.js"></script>
     <script type="text/javascript" src="./js/autoload.js"></script>
     <script type="text/javascript" src="./js/html5shiv.js"></script>
 
@@ -92,6 +93,10 @@
         .entryListRow:hover {
             background-color: #fefbd6;;
         }
+
+        .ulnostyle {
+            list-style: none !important;
+        }
     </style>
 </head>
 
@@ -131,9 +136,55 @@
                         {{#each entryList}}
                         <li class="entryListRow">{{{decorate @key}}}
                                 <span class="verbContainer">
-                            {{#each this}}
-                                <span class="clickable ink-label {{getLabelColor this}}">{{verb}}</span>
-                            {{/each}}
+                                    {{#each this}}
+                                        <span class="clickable ink-label {{getLabelColor this}}"
+                                              id="{{generateResEntryID this}}-toggle">{{verb}}</span>
+
+                                       <div class="ink-shade hide-all">
+                                           <div class="ink-modal" data-trigger="#{{generateResEntryID this}}-toggle">
+                                               <div class="modal-header">
+                                                   <button class="modal-close ink-dismiss"></button>
+                                                   <h5>{{methodName}} - {{verb}} {{fullPath}}</h5>
+                                               </div>
+                                               <div class="modal-body">
+                                                   <h3><span class="ink-label {{getLabelColor this}}">{{verb}}</span>
+                                                       {{{decorate fullPath}}}</h3>
+
+                                                   <div class="box">
+                                                       <span class="ink-badge black"><i
+                                                               class="icon-chevron-sign-left"></i> Request</span>
+                                                       {{#if requestEntity}}
+                                                       {{requestEntity}}
+                                                       {{/if}}
+                                                       {{#if queryParams}}
+                                                       <ul class="unstyled ulnostyle">
+                                                           {{#each queryParams}}
+                                                           <li>
+                                                               <span class="ink-label info">QueryParam</span>
+                                                               {{this.name}} ({{extractName this.className}})
+                                                           </li>
+                                                           {{/each}}
+                                                       </ul>
+                                                       {{/if}}
+
+                                                   </div>
+                                                   <div class="box">
+                                                       <span class="ink-badge black"><i
+                                                               class="icon-chevron-sign-right"></i> Response</span>
+                                                       {{#if responseEntity}}
+                                                       {{responseEntity}}
+                                                       {{/if}}
+                                                   </div>
+                                               </div>
+                                               <div class="modal-footer">
+                                                   <div class="push-right">
+                                                       <button class="ink-button grey ink-dismiss">Close</button>
+                                                   </div>
+                                               </div>
+                                           </div>
+                                       </div>
+
+                                    {{/each}}
                                 </span>
                         </li>
                         {{/each}}
