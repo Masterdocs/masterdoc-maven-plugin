@@ -42,7 +42,6 @@
         <reflection.version>0.9.9-RC1</reflection.version>
         <jsr311-api.version>1.1.1</jsr311-api.version>
         <jackson-jaxrs.version>1.9.12</jackson-jaxrs.version>
-        <camel-core.version>2.8.0</camel-core.version>
         <spring.version>3.0.5.RELEASE</spring.version>
         <gentyref.version>1.1.0</gentyref.version>
         <plexus-spring.version>1.2</plexus-spring.version>
@@ -52,6 +51,7 @@
         <handlebars-version>1.1.2</handlebars-version>
         <sonatypeOssDistMgmtSnapshotsUrl>https://oss.sonatype.org/content/repositories/snapshots/
         </sonatypeOssDistMgmtSnapshotsUrl>
+        <slf4j.version>1.6.6</slf4j.version>
     </properties>
 
     <dependencies>
@@ -102,11 +102,6 @@
             <version>${reflection.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.apache.camel</groupId>
-            <artifactId>camel-core</artifactId>
-            <version>${camel-core.version}</version>
-        </dependency>
-        <dependency>
             <groupId>com.googlecode.gentyref</groupId>
             <artifactId>gentyref</artifactId>
             <version>${gentyref.version}</version>
@@ -132,7 +127,11 @@
             <artifactId>handlebars</artifactId>
             <version>${handlebars-version}</version>
         </dependency>
-
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>${slf4j.version}</version>
+        </dependency>
         <!-- TEST -->
         <dependency>
             <groupId>org.assertj</groupId>

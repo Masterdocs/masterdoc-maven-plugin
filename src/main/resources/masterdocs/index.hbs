@@ -166,7 +166,16 @@
                                                            {{/each}}
                                                        </ul>
                                                        {{/if}}
-
+                                                       {{#if pathParams}}
+                                                       <ul class="unstyled ulnostyle">
+                                                           {{#each pathParams}}
+                                                           <li>
+                                                               <span class="ink-label info">PathParams</span>
+                                                               {{this.name}} ({{extractName this.className}})
+                                                           </li>
+                                                           {{/each}}
+                                                       </ul>
+                                                       {{/if}}
                                                    </div>
                                                    <div class="box">
                                                        <span class="ink-badge black"><i

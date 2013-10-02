@@ -22,7 +22,6 @@ import java.util.zip.ZipFile;
 import javax.ws.rs.*;
 import javax.xml.bind.annotation.XmlElement;
 
-import org.apache.camel.Consume;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.jackson.annotate.JsonIgnore;
@@ -307,8 +306,7 @@ public class MasterDocGenerator {
                 res.getEntryList().put(resourceEntry.getFullPath(), new ArrayList<ResourceEntry>());
               }
               List<ResourceEntry> resourceEntries = res.getEntryList().get(resourceEntry.getFullPath());
-              resourceEntries.add(resourceEntry);
-              res.getEntryList().put(resourceEntry.getFullPath(), resourceEntries);
+              res.getEntryList().put(resourceEntry.getFullPath(), addResourceEntries(resourceEntries, resourceEntry));
             }
           }
         }
@@ -332,8 +330,7 @@ public class MasterDocGenerator {
               res.getEntryList().put(resourceEntry.getFullPath(), new ArrayList<ResourceEntry>());
             }
             List<ResourceEntry> resourceEntries = res.getEntryList().get(resourceEntry.getFullPath());
-            resourceEntries.add(resourceEntry);
-            res.getEntryList().put(resourceEntry.getFullPath(), resourceEntries);
+            res.getEntryList().put(resourceEntry.getFullPath(), addResourceEntries(resourceEntries, resourceEntry));
           }
         }
 
@@ -344,6 +341,20 @@ public class MasterDocGenerator {
         consoleLogger.debug(">>skip " + resource.getCanonicalName());
       }
     }
+  }
+
+  private List<ResourceEntry> addResourceEntries(List<ResourceEntry> resourceEntries, ResourceEntry resourceEntry) {
+    final Iterator<ResourceEntry> iterator = resourceEntries.iterator();
+    while (iterator.hasNext()) {
+      final ResourceEntry next = iterator.next();
+      if (next.getVerb().equals(resourceEntry.getVerb())) {
+        iterator.remove();
+      }
+    }
+
+    resourceEntries.add(resourceEntry);
+
+    return resourceEntries;
   }
 
   private void getMetadata() {
@@ -558,14 +569,6 @@ public class MasterDocGenerator {
         resourceEntry
             .setMediaTypeConsumes(((Consumes) declaredAnnotation)
                 .value()[0]);
-      }
-      if (declaredAnnotation instanceof Consume) {
-        CamelConsumeAnnotation camelConsumeAnnotation = new CamelConsumeAnnotation();
-        camelConsumeAnnotation
-            .setContext((((Consume) declaredAnnotation)).context());
-        camelConsumeAnnotation.setUri((((Consume) declaredAnnotation))
-            .uri());
-        resourceEntry.setCamelConsume(camelConsumeAnnotation);
       }
       if (declaredAnnotation instanceof GET) {
         resourceEntry.setVerb(GET);
