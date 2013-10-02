@@ -12,6 +12,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.text.SimpleDateFormat;
@@ -22,10 +23,13 @@ import java.util.zip.ZipFile;
 import javax.ws.rs.*;
 import javax.xml.bind.annotation.XmlElement;
 
+import org.apache.http.client.utils.URIBuilder;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jettison.json.JSONException;
+import org.codehaus.jettison.json.JSONObject;
 import org.codehaus.plexus.logging.console.ConsoleLogger;
 import org.reflections.Reflections;
 
@@ -69,6 +73,7 @@ public class MasterDocGenerator {
   public static final String           DOT                     = ".";
   public static final String           COMMA                   = ",";
   public static final String           MASTERDOCS_DIR          = "masterdocs";
+  public static final String           JAVA_UTIL_LIST          = "java.util.list";
 
   // ----------------------------------------------------------------------
   // Variables
@@ -856,7 +861,7 @@ public class MasterDocGenerator {
     handlebars.registerHelper("decorate", new Helper<String>() {
       @Override
       public CharSequence apply(String context, Options options) throws IOException {
-        return context.replaceAll("\\{", "<span class=\"ink-label success success invert\">{").replaceAll("}", "}</span>");
+        return decorateURL(context);
       }
     });
 
@@ -870,6 +875,45 @@ public class MasterDocGenerator {
       }
     });
 
+    handlebars.registerHelper("URL", new Helper<ResourceEntry>() {
+      @Override
+      public CharSequence apply(ResourceEntry context, Options options) throws IOException {
+        URIBuilder uriBuilder = new URIBuilder();
+        for (Param queryParam : context.getQueryParams()) {
+          uriBuilder.addParameter(queryParam.getName(), "value");
+        }
+        uriBuilder.setPath(context.getFullPath());
+        try {
+          return decorateURL(uriBuilder.build().toString().replaceAll("%7B", "{").replaceAll("%7D", "}"));
+        } catch (URISyntaxException e) {
+          return decorateURL(context.getFullPath());
+        }
+      }
+    });
+
+    handlebars.registerHelper("JSON", new Helper<String>() {
+
+      @Override
+      public CharSequence apply(String context, Options options) throws IOException {
+        if (JAVA_UTIL_LIST)
+        final AbstractEntity entity = extractEntity(context);
+        if (null != entity) {
+          if (entity instanceof Entity) {
+            JSONObject jso = new JSONObject();
+            try {
+              jso = getJSONFromEntity((Entity) entity);
+            } catch (JSONException e) {
+
+            }
+            return jso.toString();
+          } else {
+            return ((Enumeration) entity).getValues().get(0);
+          }
+        }
+        return null;
+      }
+    });
+
     Template template = handlebars.compile("index");
     Context ctx = Context.newContext(masterDoc);
     String newIndex = template.apply(ctx);
@@ -879,6 +923,49 @@ public class MasterDocGenerator {
     bw.write(newIndex);
     bw.close();
     return newIndex;
+  }
+
+  private JSONObject getJSONFromEntity(Entity entity) throws JSONException {
+    JSONObject jsonObject = new JSONObject();
+    final Map<String, AbstractEntity> fields = ((Entity) entity).getFields();
+    if (fields != null && fields.keySet() != null) {
+      final Iterator<String> iterator = fields.keySet().iterator();
+      while (iterator.hasNext()) {
+        final String key = iterator.next();
+        final AbstractEntity abstractEntity = fields.get(key);
+        if (null != entity) {
+          if (abstractEntity instanceof Entity) {
+            jsonObject.put(key, getJSONFromEntity((Entity) abstractEntity));
+          } else {
+            final List<String> values = ((Enumeration) abstractEntity).getValues();
+            if (values != null && !values.isEmpty()) {
+              jsonObject.put(key, values.get(0));
+            }
+          }
+        }
+      }
+    }
+    return jsonObject;
+  }
+
+  private AbstractEntity extractEntity(String entityName) {
+    for (AbstractEntity entity : entities) {
+      if (entityName.equals(entity.getName())) {
+        return entity;
+      }
+    }
+    return null;
+  }
+
+  private CharSequence decorateURL(String context) {
+    String url = context.replaceAll("\\{", "<span class=\"ink-label success invert\">{")
+        .replaceAll("}", "}</span>")
+        .replaceAll("&", "</span>&<span class=\"ink-label info invert\">")
+        .replaceAll("\\?", "?<span class=\"ink-label info invert\">");
+    if (url.indexOf("?") > -1) {
+      url = url + "</span>";
+    }
+    return url;
   }
 
   private CharSequence extractNameFromFQN(String name) {

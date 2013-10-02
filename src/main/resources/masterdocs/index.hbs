@@ -144,17 +144,18 @@
                                            <div class="ink-modal" data-trigger="#{{generateResEntryID this}}-toggle">
                                                <div class="modal-header">
                                                    <button class="modal-close ink-dismiss"></button>
-                                                   <h5>{{methodName}} - {{verb}} {{fullPath}}</h5>
+                                                   <h5>{{methodName}} - {{verb}} {{{URL this}}}</h5>
                                                </div>
                                                <div class="modal-body">
                                                    <h3><span class="ink-label {{getLabelColor this}}">{{verb}}</span>
-                                                       {{{decorate fullPath}}}</h3>
+                                                       {{{URL this}}}</h3>
 
                                                    <div class="box">
                                                        <span class="ink-badge black"><i
                                                                class="icon-chevron-sign-left"></i> Request</span>
                                                        {{#if requestEntity}}
-                                                       {{requestEntity}}
+                                                       {{requestEntity}} <span
+                                                           class="ink-badge grey clickable">JSON</span>
                                                        {{/if}}
                                                        {{#if queryParams}}
                                                        <ul class="unstyled ulnostyle">
@@ -170,7 +171,7 @@
                                                        <ul class="unstyled ulnostyle">
                                                            {{#each pathParams}}
                                                            <li>
-                                                               <span class="ink-label info">PathParams</span>
+                                                               <span class="ink-label success">PathParams</span>
                                                                {{this.name}} ({{extractName this.className}})
                                                            </li>
                                                            {{/each}}
@@ -181,7 +182,12 @@
                                                        <span class="ink-badge black"><i
                                                                class="icon-chevron-sign-right"></i> Response</span>
                                                        {{#if responseEntity}}
-                                                       {{responseEntity}}
+                                                       {{responseEntity}}<span
+                                                           class="ink-badge grey clickable">JSON</span>
+
+                                                       <div class="">
+                                                           {{{JSON responseEntity}}}
+                                                       </div>
                                                        {{/if}}
                                                    </div>
                                                </div>
