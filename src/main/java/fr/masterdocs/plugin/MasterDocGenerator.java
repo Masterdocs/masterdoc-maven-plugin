@@ -1,5 +1,6 @@
 package fr.masterdocs.plugin;
 
+import static com.google.common.base.Defaults.defaultValue;
 import static java.io.File.separator;
 import static java.text.MessageFormat.format;
 import static org.springframework.util.StringUtils.capitalize;
@@ -28,6 +29,7 @@ import org.apache.maven.artifact.Artifact;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.codehaus.plexus.logging.console.ConsoleLogger;
@@ -73,7 +75,9 @@ public class MasterDocGenerator {
   public static final String           DOT                     = ".";
   public static final String           COMMA                   = ",";
   public static final String           MASTERDOCS_DIR          = "masterdocs";
-  public static final String           JAVA_UTIL_LIST          = "java.util.list";
+  public static final Integer          MAX_DEPTH               = 3;
+  private static final String          JAVA_UTIL_LIST          = "java.util.List";
+  private static final String          JAVA_UTIL_SET           = "java.util.Set";
 
   // ----------------------------------------------------------------------
   // Variables
@@ -97,7 +101,6 @@ public class MasterDocGenerator {
   /**
    * Final MasterDoc.
    */
-  private MasterDoc                    masterDoc;
   private Set<String>                  entityList;
   private MavenProject                 project;
   private ClassLoader                  originalClassLoader     = Thread.currentThread().getContextClassLoader();
@@ -895,15 +898,33 @@ public class MasterDocGenerator {
 
       @Override
       public CharSequence apply(String context, Options options) throws IOException {
-        if (JAVA_UTIL_LIST)
+
+        JSONObject jso = new JSONObject();
+        JSONArray jsa = null;
+        if (context.startsWith(JAVA_UTIL_HASH_MAP) ||
+            context.startsWith(JAVA_UTIL_SET) ||
+            context.startsWith(JAVA_UTIL_LIST)) {
+          jsa = new JSONArray();
+          final int beginIndex = context.indexOf("<") + 1;
+          final int finishIndex = context.indexOf(">");
+          context = context.substring(beginIndex, finishIndex);
+        }
         final AbstractEntity entity = extractEntity(context);
         if (null != entity) {
           if (entity instanceof Entity) {
-            JSONObject jso = new JSONObject();
             try {
-              jso = getJSONFromEntity((Entity) entity);
+              final Object jsonFromEntity = getJSONFromEntity((Entity) entity, 0);
+              if (jsonFromEntity instanceof JSONObject) {
+                jso = (JSONObject) jsonFromEntity;
+              } else {
+                jsa = (JSONArray) jsonFromEntity;
+              }
             } catch (JSONException e) {
 
+            }
+            if (null != jsa) {
+              jsa.put(jso);
+              return jsa.toString();
             }
             return jso.toString();
           } else {
@@ -925,25 +946,64 @@ public class MasterDocGenerator {
     return newIndex;
   }
 
-  private JSONObject getJSONFromEntity(Entity entity) throws JSONException {
+  private Object getJSONFromEntity(Entity entity, int depth) throws JSONException {
+    if (depth > MAX_DEPTH) {
+      return new JSONObject();
+    }
+    depth++;
     JSONObject jsonObject = new JSONObject();
-    final Map<String, AbstractEntity> fields = ((Entity) entity).getFields();
-    if (fields != null && fields.keySet() != null) {
-      final Iterator<String> iterator = fields.keySet().iterator();
-      while (iterator.hasNext()) {
-        final String key = iterator.next();
-        final AbstractEntity abstractEntity = fields.get(key);
-        if (null != entity) {
-          if (abstractEntity instanceof Entity) {
-            jsonObject.put(key, getJSONFromEntity((Entity) abstractEntity));
-          } else {
-            final List<String> values = ((Enumeration) abstractEntity).getValues();
-            if (values != null && !values.isEmpty()) {
-              jsonObject.put(key, values.get(0));
-            }
-          }
+    JSONArray jsa = null;
+    String name = entity.getName();
+    if (name.startsWith(JAVA_UTIL_HASH_MAP) ||
+        name.startsWith(JAVA_UTIL_SET) ||
+        name.startsWith(JAVA_UTIL_LIST)) {
+      jsa = new JSONArray();
+      final int beginIndex = name.indexOf("<") + 1;
+      final int finishIndex = name.indexOf(">");
+      name = name.substring(beginIndex, finishIndex);
+    }
+    final AbstractEntity extractEntity = extractEntity(name);
+    if (null != extractEntity) {
+      // SuperClass
+      final Entity myEntity = (Entity) extractEntity;
+      final String superClass = myEntity.getSuperClass();
+      if (null != superClass) {
+        final AbstractEntity superClassEntity = extractEntity(superClass);
+        jsonObject = enrichWithFields(jsonObject, (Entity) superClassEntity, depth);
+      }
+      // Class
+      jsonObject = enrichWithFields(jsonObject, myEntity, depth);
+    } else {
+      // Maybe a JDK type, trying to instanciate
+      Class aClass = null;
+      try {
+        aClass = Class.forName(name);
+      } catch (ClassNotFoundException e) {
+        if ("boolean".equals(name)) {
+          aClass = boolean.class;
+        } else if ("byte".equals(name)) {
+          aClass = byte.class;
+        } else if ("short".equals(name)) {
+          aClass = short.class;
+        } else if ("int".equals(name)) {
+          aClass = int.class;
+        } else if ("long".equals(name)) {
+          aClass = long.class;
+        } else if ("long".equals(name)) {
+          aClass = float.class;
+        } else if ("double".equals(name)) {
+          aClass = double.class;
         }
       }
+      try {
+        return aClass.newInstance();
+      } catch (Exception e) {
+        return defaultValue(aClass);
+      }
+    }
+    if (null != jsa) {
+      jsa.put(jsonObject);
+      return jsa;
     }
     return jsonObject;
   }
@@ -955,6 +1015,34 @@ public class MasterDocGenerator {
       }
     }
     return null;
+  }
+
+  private JSONObject enrichWithFields(JSONObject parent, Entity entity, int depth) throws JSONException {
+    final Map<String, AbstractEntity> fields = entity.getFields();
+    if (fields != null && fields.keySet() != null) {
+      final Iterator<String> iterator = fields.keySet().iterator();
+      while (iterator.hasNext()) {
+        final String key = iterator.next();
+        final AbstractEntity abstractEntity = fields.get(key);
+        if (null != abstractEntity) {
+          if (abstractEntity instanceof Entity) {
+            parent.put(key, getJSONFromEntity((Entity) abstractEntity, depth));
+          } else {
+            final AbstractEntity enumExtracted = extractEntity(abstractEntity.getName());
+            if (null != enumExtracted) {
+              final List<String> values = ((Enumeration) enumExtracted).getValues();
+              if (values != null && !values.isEmpty()) {
+                parent.put(key, values.get(0));
+              }
+            } else {
+              parent.put(key, "{" + abstractEntity.getName() + "}");
+            }
+            // }
+          }
+        }
+      }
+    }
+    return parent;
   }
 
   private CharSequence decorateURL(String context) {
