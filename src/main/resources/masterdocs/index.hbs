@@ -21,17 +21,20 @@
     <link rel="apple-touch-icon" href="./img/apple-touch-icon-57x57.png">
 
     <link rel="stylesheet" type="text/css" href="./css/ink.css">
+    <link rel="stylesheet" type="text/css" href="./css/jsonFormatter.css">
 
     <!--[if IE 7 ]>
     <link rel="stylesheet" href="./css/ink-ie7.css" type="text/css" media="screen" title="no title" charset="utf-8">
     <![endif]-->
 
+    <script src="http://code.jquery.com/jquery-git1.js"></script>
     <script type="text/javascript" src="./js/holder.js"></script>
     <script type="text/javascript" src="./js/ink.min.js"></script>
     <script type="text/javascript" src="./js/ink-ui.min.js"></script>
     <script type="text/javascript" src="./js/ink.modal.js"></script>
     <script type="text/javascript" src="./js/autoload.js"></script>
     <script type="text/javascript" src="./js/html5shiv.js"></script>
+    <script type="text/javascript" src="./js/jsonformatter.js"></script>
 
     <script type="text/javascript" src="./js/ink.toggle.js"></script>
 
@@ -91,13 +94,39 @@
         }
 
         .entryListRow:hover {
-            background-color: #fefbd6;;
+            background-color: #fefbd6;
         }
 
         .ulnostyle {
             list-style: none !important;
         }
+
+        .json-source {
+            display: none;
+        }
+
+        .json-dest {
+            font-family: monospace;
+            white-space: pre;
+        / / or pre-wrap / / All fails without this one !
+        }
     </style>
+    <script>
+        function revealJSON($elem) {
+            var $parent = $elem.parent();
+            var $dest = $parent.find('.json-dest');
+            var $src = $parent.find('.json-source');
+            if ($dest.is(':visible')) {
+                $dest.html("");
+                $dest.hide();
+            } else {
+                $dest.jsonFormat($src);
+                $dest.show();
+            }
+
+
+        }
+    </script>
 </head>
 
 <body>
@@ -155,7 +184,14 @@
                                                                class="icon-chevron-sign-left"></i> Request</span>
                                                        {{#if requestEntity}}
                                                        {{requestEntity}} <span
-                                                           class="ink-badge grey clickable">JSON</span>
+                                                           class="ink-badge grey clickable"
+                                                           onclick="revealJSON($(this));">JSON</span>
+
+                                                       <div class="json-source hide-all">
+                                                           {{{JSON requestEntity}}}
+                                                       </div>
+                                                       <div class="json-dest hide-all">
+                                                       </div>
                                                        {{/if}}
                                                        {{#if queryParams}}
                                                        <ul class="unstyled ulnostyle">
@@ -183,10 +219,13 @@
                                                                class="icon-chevron-sign-right"></i> Response</span>
                                                        {{#if responseEntity}}
                                                        {{responseEntity}}<span
-                                                           class="ink-badge grey clickable">JSON</span>
+                                                           class="ink-badge grey clickable"
+                                                           onclick="revealJSON($(this));">JSON</span>
 
-                                                       <div class="">
+                                                       <div class="json-source hide-all">
                                                            {{{JSON responseEntity}}}
+                                                       </div>
+                                                       <div class="json-dest hide-all">
                                                        </div>
                                                        {{/if}}
                                                    </div>

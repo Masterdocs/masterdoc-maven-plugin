@@ -75,7 +75,7 @@ public class MasterDocGenerator {
   public static final String           DOT                     = ".";
   public static final String           COMMA                   = ",";
   public static final String           MASTERDOCS_DIR          = "masterdocs";
-  public static final Integer          MAX_DEPTH               = 3;
+  public static final Integer          MAX_DEPTH               = 4;
   private static final String          JAVA_UTIL_LIST          = "java.util.List";
   private static final String          JAVA_UTIL_SET           = "java.util.Set";
 
@@ -947,9 +947,9 @@ public class MasterDocGenerator {
   }
 
   private Object getJSONFromEntity(Entity entity, int depth) throws JSONException {
-    if (depth > MAX_DEPTH) {
-      return new JSONObject();
-    }
+    /*
+     * if (depth > MAX_DEPTH) { return new JSONObject(); }
+     */
     depth++;
     JSONObject jsonObject = new JSONObject();
     JSONArray jsa = null;
@@ -1026,7 +1026,11 @@ public class MasterDocGenerator {
         final AbstractEntity abstractEntity = fields.get(key);
         if (null != abstractEntity) {
           if (abstractEntity instanceof Entity) {
-            parent.put(key, getJSONFromEntity((Entity) abstractEntity, depth));
+            if (depth > MAX_DEPTH) {
+              parent.put(key, new JSONObject());
+            } else {
+              parent.put(key, getJSONFromEntity((Entity) abstractEntity, depth));
+            }
           } else {
             final AbstractEntity enumExtracted = extractEntity(abstractEntity.getName());
             if (null != enumExtracted) {
