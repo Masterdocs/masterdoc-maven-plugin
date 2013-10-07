@@ -75,9 +75,9 @@ public class MasterDocGenerator {
   public static final String           DOT                     = ".";
   public static final String           COMMA                   = ",";
   public static final String           MASTERDOCS_DIR          = "masterdocs";
-  public static final Integer          MAX_DEPTH               = 4;
   private static final String          JAVA_UTIL_LIST          = "java.util.List";
   private static final String          JAVA_UTIL_SET           = "java.util.Set";
+  public Integer                       MAX_DEPTH               = 1;
 
   // ----------------------------------------------------------------------
   // Variables
@@ -116,7 +116,7 @@ public class MasterDocGenerator {
 
   }
 
-  public MasterDocGenerator(MavenProject project, String pathToGenerateFile, String[] packageDocumentationResources, boolean generateHTMLSite)
+  public MasterDocGenerator(MavenProject project, String pathToGenerateFile, String[] packageDocumentationResources, boolean generateHTMLSite, Integer maxDepth)
       throws SecurityException,
       NoSuchFieldException,
       IllegalArgumentException, IllegalAccessException {
@@ -127,6 +127,9 @@ public class MasterDocGenerator {
     entityList = new HashSet<String>();
     this.project = project;
     this.pathToGenerateFile = pathToGenerateFile;
+    if (null != maxDepth) {
+      this.MAX_DEPTH = maxDepth;
+    }
     // ////////////////////
     generateProjectClassLoader(project);
     // ////////////////////
@@ -913,7 +916,8 @@ public class MasterDocGenerator {
         if (null != entity) {
           if (entity instanceof Entity) {
             try {
-              final Object jsonFromEntity = getJSONFromEntity((Entity) entity, 0);
+              final HashMap<String, Integer> depthObj = new HashMap<String, Integer>();
+              final Object jsonFromEntity = getJSONFromEntity((Entity) entity, depthObj);
               if (jsonFromEntity instanceof JSONObject) {
                 jso = (JSONObject) jsonFromEntity;
               } else {
@@ -946,11 +950,8 @@ public class MasterDocGenerator {
     return newIndex;
   }
 
-  private Object getJSONFromEntity(Entity entity, int depth) throws JSONException {
-    /*
-     * if (depth > MAX_DEPTH) { return new JSONObject(); }
-     */
-    depth++;
+  private Object getJSONFromEntity(Entity entity, HashMap<String, Integer> depthObj) throws JSONException {
+
     JSONObject jsonObject = new JSONObject();
     JSONArray jsa = null;
     String name = entity.getName();
@@ -962,17 +963,26 @@ public class MasterDocGenerator {
       final int finishIndex = name.indexOf(">");
       name = name.substring(beginIndex, finishIndex);
     }
+
     final AbstractEntity extractEntity = extractEntity(name);
     if (null != extractEntity) {
+      if (!depthObj.containsKey(name)) {
+        depthObj.put(name, 0);
+      }
+      final Integer nbObj = depthObj.get(name) + 1;
+      if (nbObj > MAX_DEPTH) {
+        return new JSONObject();
+      }
+      depthObj.put(name, nbObj);
       // SuperClass
       final Entity myEntity = (Entity) extractEntity;
       final String superClass = myEntity.getSuperClass();
       if (null != superClass) {
         final AbstractEntity superClassEntity = extractEntity(superClass);
-        jsonObject = enrichWithFields(jsonObject, (Entity) superClassEntity, depth);
+        jsonObject = enrichWithFields(jsonObject, (Entity) superClassEntity, depthObj);
       }
       // Class
-      jsonObject = enrichWithFields(jsonObject, myEntity, depth);
+      jsonObject = enrichWithFields(jsonObject, myEntity, depthObj);
     } else {
       // Maybe a JDK type, trying to instanciate
       Class aClass = null;
@@ -1017,7 +1027,7 @@ public class MasterDocGenerator {
     return null;
   }
 
-  private JSONObject enrichWithFields(JSONObject parent, Entity entity, int depth) throws JSONException {
+  private JSONObject enrichWithFields(JSONObject parent, Entity entity, HashMap<String, Integer> depthObj) throws JSONException {
     final Map<String, AbstractEntity> fields = entity.getFields();
     if (fields != null && fields.keySet() != null) {
       final Iterator<String> iterator = fields.keySet().iterator();
@@ -1026,10 +1036,10 @@ public class MasterDocGenerator {
         final AbstractEntity abstractEntity = fields.get(key);
         if (null != abstractEntity) {
           if (abstractEntity instanceof Entity) {
-            if (depth > MAX_DEPTH) {
+            if (depthObj.containsKey(abstractEntity.getName()) && depthObj.get(abstractEntity.getName()) > MAX_DEPTH) {
               parent.put(key, new JSONObject());
             } else {
-              parent.put(key, getJSONFromEntity((Entity) abstractEntity, depth));
+              parent.put(key, getJSONFromEntity((Entity) abstractEntity, depthObj));
             }
           } else {
             final AbstractEntity enumExtracted = extractEntity(abstractEntity.getName());
