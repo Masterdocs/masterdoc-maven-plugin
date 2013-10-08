@@ -939,6 +939,24 @@ public class MasterDocGenerator {
       }
     });
 
+    handlebars.registerHelper("LINK", new Helper<AbstractEntity>() {
+
+      @Override
+      public CharSequence apply(AbstractEntity context, Options options) throws IOException {
+        String name = context.getName();
+        if (name.startsWith(JAVA_UTIL_HASH_MAP) ||
+            name.startsWith(JAVA_UTIL_SET) ||
+            name.startsWith(JAVA_UTIL_LIST)) {
+
+          final int beginIndex = name.indexOf("<") + 1;
+          final int finishIndex = name.indexOf(">");
+          name = name.substring(beginIndex, finishIndex);
+        }
+
+        return "<a href=\"#" + name + "\">";
+      }
+    });
+
     Template template = handlebars.compile("index");
     Context ctx = Context.newContext(masterDoc);
     String newIndex = template.apply(ctx);
