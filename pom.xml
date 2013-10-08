@@ -47,7 +47,7 @@
         <plexus-spring.version>1.2</plexus-spring.version>
         <assertj-core.version>1.2.0</assertj-core.version>
         <junit.version>4.10</junit.version>
-        <masterdoc-entity.version>1.0-SNAPSHOT</masterdoc-entity.version>
+        <masterdoc-entity.version>1.0</masterdoc-entity.version>
         <handlebars-version>1.1.2</handlebars-version>
         <sonatypeOssDistMgmtSnapshotsUrl>https://oss.sonatype.org/content/repositories/snapshots/
         </sonatypeOssDistMgmtSnapshotsUrl>
