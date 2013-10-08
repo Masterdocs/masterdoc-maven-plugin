@@ -28,9 +28,9 @@
     <description>Generate the REST documentation</description>
 
     <scm>
+        <url>https://github.com/Masterdocs/masterdoc-maven-plugin</url>
         <connection>scm:git:git@github.com:Masterdocs/masterdoc-maven-plugin.git</connection>
         <developerConnection>scm:git:git@github.com:Masterdocs/masterdoc-maven-plugin.git</developerConnection>
-        <url>git@github.com:Masterdocs/masterdoc-maven-plugin.git</url>
     </scm>
     <properties>
         <maven-plugin-api.version>3.1.0</maven-plugin-api.version>
@@ -177,6 +177,11 @@
                         </goals>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-release-plugin</artifactId>
+                <version>2.1</version>
             </plugin>
         </plugins>
     </build>
