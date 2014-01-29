@@ -135,251 +135,181 @@
 
 <body>
 <div class="ink-grid">
-<header>
-    <h1 id="header" class="pull-left medium-100 small-100">
-        <img src="./img/masterdocs.png" class="logo"/>MasterDocs for
-        {{metadata.artifactId}}
-        <small class="tooltip" data-tip-text="{{metadata.groupId}}.{{metadata.artifactId}}.{{metadata.version}}"
-               data-tip-where="down">Version {{metadata.version}}
-        </small>
-    </h1>
-</header>
-<div class="column-group gutters">
-<div class="large-20 medium-25 small-100">
-    <nav class="ink-navigation sticky" data-offset-top="70px" data-offset-bottom="350px" id="alerts_menu">
-        <ul class="menu vertical grey flat rounded">
-            <li class=""><a class="scrollableLink" href="#header"><span class="icon-chevron-up"></span> Back to
-                Top</a></li>
-            <li class="active"><a class="scrollableLink" href="#nav-resources">Resources</a></li>
-            <li class=""><a class="scrollableLink" href="#nav-entities">Entities</a></li>
-        </ul>
-    </nav>
-</div>
-<div class="large-80 medium-75 small-100">
-<section id="nav-resources" data-spy="true" data-target="#alerts_menu">
-    <h2>Resources</h2>
-    {{#each resources}}
-        <dl id="{{rootPath}}" class="box">
-            <dt>{{rootPath}}
-                <button class="toggle" data-target="#{{generateResID this}}-toggle"><i
-                        class="icon-collapse icon-medium"></i> details
-                </button>
-            </dt>
-            <ul id="{{generateResID this}}-toggle" class="hide-all unstyled">
-                {{#each entryList}}
-                    <li class="entryListRow">{{{decorate @key}}}
-                        <span class="verbContainer">
-                            {{#each this}}
-                                <span class="clickable ink-label {{getLabelColor this}}"
-                                      id="{{generateResEntryID this}}-toggle">{{verb}}</span>
-
-                                       <!--<div class="ink-shade fade" id="{{generateResEntryID this}}-toggle">
-                                           <div class="ink-modal" data-trigger="#{{generateResEntryID this}}-toggle">
-                                               <div class="modal-header">
-                                                   <button class="modal-close ink-dismiss"></button>
-                                                   <h5>{{verb}} {{{URL this}}} - {{methodName}}</h5>
-                                               </div>
-                                               <div class="modal-body">
-                                                   <h3><span class="ink-label {{getLabelColor this}}">{{verb}}</span>
-                                                       {{{URL this}}} - {{methodName}}</h3>
-
-                                                   <div class="box">
-                                                       <span class="ink-badge black"><i
-                                                               class="icon-chevron-sign-left"></i> Request</span>
-                                                       {{#if requestEntity}}
-                                           {{requestEntity}} <span
-                                                           class="ink-badge grey clickable"
-                                                           onclick="revealJSON($(this));">JSON</span>
-
-                                                       <div class="json-source hide-all">
-                                                           {{{JSON requestEntity}}}
-                                                       </div>
-                                                       <div class="json-dest hide-all">
-                                                       </div>
-                                                       {{/if}}
-                                           {{#if queryParams}}
-                                                       <ul class="unstyled ulnostyle">
-                                                           {{#each queryParams}}
-                                                           <li>
-                                                               <span class="ink-label info">QueryParam</span>
-                                                               {{this.name}} ({{extractName this.className}})
-                                                           </li>
-                                                           {{/each}}
-                                                       </ul>
-                                                       {{/if}}
-                                           {{#if pathParams}}
-                                                       <ul class="unstyled ulnostyle">
-                                                           {{#each pathParams}}
-                                                           <li>
-                                                               <span class="ink-label success">PathParams</span>
-                                                               {{this.name}} ({{extractName this.className}})
-                                                           </li>
-                                                           {{/each}}
-                                                       </ul>
-                                                       {{/if}}
-                                                   </div>
-                                                   <div class="box">
-                                                       <span class="ink-badge black"><i
-                                                               class="icon-chevron-sign-right"></i> Response</span>
-                                                       {{#if responseEntity}}
-                                           {{responseEntity}}<span
-                                                           class="ink-badge grey clickable"
-                                                           onclick="revealJSON($(this));">JSON</span>
-
-                                                       <div class="json-source hide-all">
-                                                           {{{JSON responseEntity}}}
-                                                       </div>
-                                                       <div class="json-dest hide-all">
-                                                       </div>
-                                                       {{/if}}
-                                                   </div>
-                                               </div>
-                                               <div class="modal-footer">
-                                                   <div class="push-right">
-                                                       <button class="ink-button grey ink-dismiss">Close</button>
-                                                   </div>
-                                               </div>
-                                           </div>
-                                       </div>-->
-
-                            {{/each}}
-                        </span>
-                    </li>
-                {{/each}}
-            </ul>
-        </dl>
-    {{/each}}
-</section>
-<section id="nav-entities" data-spy="true" data-target="#alerts_menu">
-    <h2>Entities</h2>
-
-    {{#each entities}}
-        <dl id="{{name}}" class="box">
-            <dt>
-                {{#isEnum}}
-                    <span class="ink-label info">E</span>
-                {{else}}
-                    <span class="ink-label warning">C</span>
-                {{/isEnum}}
-                {{extractName this.name}}
-                <button class="toggle" data-target="#{{extractName this.name}}-toggle">
-                    <i class="icon-collapse"></i> details
-                </button>
-            </dt>
-            <div id="{{extractName this.name}}-toggle" class="hide-all">
-                {{#if superClass}}
-                    <dd>superclass : <a href="#{{superClass}}">{{extractName this.superClass}}</a></dd>
-                {{/if}}
-                <dd>
-                    <ul class="unstyled">
-                        {{#if fields}}
-                            {{#each fields}}
-                                <li>
-                                    {{#isEnum}}
-                                        <span class="ink-label info">E</span>
-                                    {{else}}
-                                        <span class="ink-label warning">C</span>
-                                    {{/isEnum}}
-                                    Name : {{@key}} - Type : {{{LINK this}}}{{extractName this.name}}
-                                    </a>
+    <header>
+        <h1 id="header" class="pull-left medium-100 small-100">
+            <img src="./img/masterdocs.png" class="logo"/>MasterDocs for
+            {{metadata.artifactId}}
+            <small class="tooltip" data-tip-text="{{metadata.groupId}}.{{metadata.artifactId}}.{{metadata.version}}"
+                   data-tip-where="down">Version {{metadata.version}}
+            </small>
+        </h1>
+    </header>
+    <div class="column-group gutters">
+        <div class="large-20 medium-25 small-100">
+            <nav class="ink-navigation sticky" data-offset-top="70px" data-offset-bottom="350px" id="alerts_menu">
+                <ul class="menu vertical grey flat rounded">
+                    <li class=""><a class="scrollableLink" href="#header"><span class="icon-chevron-up"></span> Back to
+                        Top</a></li>
+                    <li class="active"><a class="scrollableLink" href="#nav-resources">Resources</a></li>
+                    <li class=""><a class="scrollableLink" href="#nav-entities">Entities</a></li>
+                </ul>
+            </nav>
+        </div>
+        <div class="large-80 medium-75 small-100">
+            <section id="nav-resources" data-spy="true" data-target="#alerts_menu">
+                <h2>Resources</h2>
+                {{#each resources}}
+                    <dl id="{{rootPath}}" class="box">
+                        <dt>{{rootPath}}
+                            <button class="toggle" data-target="#{{generateResID this}}-toggle"><i
+                                    class="icon-collapse icon-medium"></i> details
+                            </button>
+                        </dt>
+                        <ul id="{{generateResID this}}-toggle" class="hide-all unstyled">
+                            {{#each entryList}}
+                                <li class="entryListRow">{{{decorate @key}}}
+                                    <span class="verbContainer">
+                                        {{#each this}}
+                                            <span class="clickable ink-label {{getLabelColor this}}"
+                                                  id="{{generateResEntryID this}}-toggle">{{verb}}</span>
+                                        {{/each}}
+                                    </span>
                                 </li>
                             {{/each}}
-                        {{else}}
-                            {{#if values}}
-                                {{#each values}}
-                                    <li><i class="icon-circle"></i> {{this}}</li>
-                                {{/each}}
-                            {{else}}
-                                <div class="ink-alert basic warning">
-                                    <p>No field for this entity</p>
-                                </div>
-                            {{/if}}
-                        {{/if}}
-                    </ul>
-                </dd>
-            </div>
-        </dl>
-    {{/each}}
-</section>
-<div id="modals">
-    {{#each resources}}
-        {{#each entryList}}
-            {{#each this}}
-                <div class="ink-shade fade" id="{{generateResEntryID this}}-toggle">
-                    <div class="ink-modal" data-trigger="#{{generateResEntryID this}}-toggle"
-                         id="{{generateResEntryID this}}-modal">
-                        <div class="modal-header">
-                            <button class="modal-close ink-dismiss"></button>
-                            <h5>{{verb}} {{{URL this}}} - {{methodName}}</h5>
-                        </div>
-                        <div class="modal-body">
-                            <h3><span class="ink-label {{getLabelColor this}}">{{verb}}</span>
-                                {{{URL this}}} - {{methodName}}</h3>
+                        </ul>
+                    </dl>
+                {{/each}}
+            </section>
+            <section id="nav-entities" data-spy="true" data-target="#alerts_menu">
+                <h2>Entities</h2>
 
-                            <div class="box">
+                {{#each entities}}
+                    <dl id="{{name}}" class="box">
+                        <dt>
+                            {{#isEnum}}
+                                <span class="ink-label info">E</span>
+                            {{else}}
+                                <span class="ink-label warning">C</span>
+                            {{/isEnum}}
+                            {{extractName this.name}}
+                            <button class="toggle" data-target="#{{extractName this.name}}-toggle">
+                                <i class="icon-collapse"></i> details
+                            </button>
+                        </dt>
+                        <div id="{{extractName this.name}}-toggle" class="hide-all">
+                            {{#if superClass}}
+                                <dd>superclass : <a href="#{{superClass}}">{{extractName this.superClass}}</a></dd>
+                            {{/if}}
+                            <dd>
+                                <ul class="unstyled">
+                                    {{#if fields}}
+                                        {{#each fields}}
+                                            <li>
+                                                {{#isEnum}}
+                                                    <span class="ink-label info">E</span>
+                                                {{else}}
+                                                    <span class="ink-label warning">C</span>
+                                                {{/isEnum}}
+                                                Name : {{@key}} - Type : {{{LINK this}}}{{extractName this.name}}
+                                                </a>
+                                            </li>
+                                        {{/each}}
+                                    {{else}}
+                                        {{#if values}}
+                                            {{#each values}}
+                                                <li><i class="icon-circle"></i> {{this}}</li>
+                                            {{/each}}
+                                        {{else}}
+                                            <div class="ink-alert basic warning">
+                                                <p>No field for this entity</p>
+                                            </div>
+                                        {{/if}}
+                                    {{/if}}
+                                </ul>
+                            </dd>
+                        </div>
+                    </dl>
+                {{/each}}
+            </section>
+            <div id="modals">
+                {{#each resources}}
+                    {{#each entryList}}
+                        {{#each this}}
+                            <div class="ink-shade fade" id="{{generateResEntryID this}}-toggle">
+                                <div class="ink-modal" data-trigger="#{{generateResEntryID this}}-toggle"
+                                     id="{{generateResEntryID this}}-modal">
+                                    <div class="modal-header">
+                                        <button class="modal-close ink-dismiss"></button>
+                                        <h5>{{verb}} {{{URL this}}} - {{methodName}}</h5>
+                                    </div>
+                                    <div class="modal-body">
+                                        <h3><span class="ink-label {{getLabelColor this}}">{{verb}}</span>
+                                            {{{URL this}}} - {{methodName}}</h3>
+
+                                        <div class="box">
                                                        <span class="ink-badge black"><i
                                                                class="icon-chevron-sign-left"></i> Request</span>
-                                {{#if requestEntity}}
-                                    {{requestEntity}} <span
-                                        class="ink-badge grey clickable"
-                                        onclick="revealJSON($(this));">JSON</span>
+                                            {{#if requestEntity}}
+                                                {{requestEntity}} <span
+                                                    class="ink-badge grey clickable"
+                                                    onclick="revealJSON($(this));">JSON</span>
 
-                                    <div class="json-source hide-all">
-                                        {{{JSON requestEntity}}}
-                                    </div>
-                                    <div class="json-dest hide-all">
-                                    </div>
-                                {{/if}}
-                                {{#if queryParams}}
-                                    <ul class="unstyled ulnostyle">
-                                        {{#each queryParams}}
-                                            <li>
-                                                <span class="ink-label info">QueryParam</span>
-                                                {{this.name}} ({{extractName this.className}})
-                                            </li>
-                                        {{/each}}
-                                    </ul>
-                                {{/if}}
-                                {{#if pathParams}}
-                                    <ul class="unstyled ulnostyle">
-                                        {{#each pathParams}}
-                                            <li>
-                                                <span class="ink-label success">PathParams</span>
-                                                {{this.name}} ({{extractName this.className}})
-                                            </li>
-                                        {{/each}}
-                                    </ul>
-                                {{/if}}
-                            </div>
-                            <div class="box">
+                                                <div class="json-source hide-all">
+                                                    {{{JSON requestEntity}}}
+                                                </div>
+                                                <div class="json-dest hide-all">
+                                                </div>
+                                            {{/if}}
+                                            {{#if queryParams}}
+                                                <ul class="unstyled ulnostyle">
+                                                    {{#each queryParams}}
+                                                        <li>
+                                                            <span class="ink-label info">QueryParam</span>
+                                                            {{this.name}} ({{extractName this.className}})
+                                                        </li>
+                                                    {{/each}}
+                                                </ul>
+                                            {{/if}}
+                                            {{#if pathParams}}
+                                                <ul class="unstyled ulnostyle">
+                                                    {{#each pathParams}}
+                                                        <li>
+                                                            <span class="ink-label success">PathParams</span>
+                                                            {{this.name}} ({{extractName this.className}})
+                                                        </li>
+                                                    {{/each}}
+                                                </ul>
+                                            {{/if}}
+                                        </div>
+                                        <div class="box">
                                                        <span class="ink-badge black"><i
                                                                class="icon-chevron-sign-right"></i> Response</span>
-                                {{#if responseEntity}}
-                                    {{responseEntity}}<span
-                                        class="ink-badge grey clickable"
-                                        onclick="revealJSON($(this));">JSON</span>
+                                            {{#if responseEntity}}
+                                                {{responseEntity}}<span
+                                                    class="ink-badge grey clickable"
+                                                    onclick="revealJSON($(this));">JSON</span>
 
-                                    <div class="json-source hide-all">
-                                        {{{JSON responseEntity}}}
+                                                <div class="json-source hide-all">
+                                                    {{{JSON responseEntity}}}
+                                                </div>
+                                                <div class="json-dest hide-all">
+                                                </div>
+                                            {{/if}}
+                                        </div>
                                     </div>
-                                    <div class="json-dest hide-all">
+                                    <div class="modal-footer">
+                                        <div class="push-right">
+                                            <button class="ink-button grey ink-dismiss">Close</button>
+                                        </div>
                                     </div>
-                                {{/if}}
+                                </div>
                             </div>
-                        </div>
-                        <div class="modal-footer">
-                            <div class="push-right">
-                                <button class="ink-button grey ink-dismiss">Close</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            {{/each}}
-        {{/each}}
-    {{/each}}
-</div>
-</div>
-</div>
+                        {{/each}}
+                    {{/each}}
+                {{/each}}
+            </div>
+        </div>
+    </div>
 </div>
 <footer>
     <div class="ink-grid">
