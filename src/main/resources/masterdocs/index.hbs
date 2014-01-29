@@ -129,6 +129,9 @@
             if (hash != "") {
                 new Ink.UI.Modal(hash).open();
             }
+            $('.clickable').click(function () {
+                location.hash = this.id.replace("toggle", "modal");
+            });
         });
     </script>
 </head>
