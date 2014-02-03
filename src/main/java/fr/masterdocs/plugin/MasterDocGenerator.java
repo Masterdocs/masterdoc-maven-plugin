@@ -217,7 +217,7 @@ public class MasterDocGenerator {
       Entity newEntity = new Entity();
       if (!entity.toString().startsWith(JAVA)) {
 
-        newEntity.setName(entity.toString());
+        newEntity.setName(entity.toString().replaceAll("\\$","."));
 
         if (entityClass.isEnum()) {
           extractEnumFields(entity);
@@ -482,10 +482,10 @@ public class MasterDocGenerator {
     AbstractEntity field;
     if (null != currEntityClass && currEntityClass.isEnum()) {
       field = new Enumeration();
-      field.setName(typeDisplay);
+      field.setName(typeDisplay.replaceAll("\\$","."));
     } else {
       field = new Entity();
-      field.setName(typeDisplay);
+      field.setName(typeDisplay.replaceAll("\\$","."));
     }
     fields.put(name, field);
   }
@@ -512,7 +512,7 @@ public class MasterDocGenerator {
     final Object[] declaredEnumConstants = entityClass.getFields();
     // final Object[] declaredEnumConstants = entityClass.getEnumConstants();
     Enumeration newEnumeration = new Enumeration();
-    newEnumeration.setName(entityString);
+    newEnumeration.setName(entityString.replaceAll("\\$","."));
     for (int i = 0; i < declaredEnumConstants.length; i++) {
       values.add(extractName(declaredEnumConstants[i].toString()));
     }
@@ -853,7 +853,7 @@ public class MasterDocGenerator {
     handlebars.registerHelper("generateResID", new Helper<Resource>() {
       @Override
       public CharSequence apply(Resource context, Options options) throws IOException {
-        return context.getRootPath().replaceAll("/", "_");
+        return context.getRootPath().replaceAll("/", "_").replaceAll("\\{", "").replaceAll("}", "");
       }
     });
 
@@ -874,7 +874,7 @@ public class MasterDocGenerator {
     handlebars.registerHelper("generateResEntryID", new Helper<ResourceEntry>() {
       @Override
       public CharSequence apply(ResourceEntry context, Options options) throws IOException {
-        return new Handlebars.SafeString((context.getFullPath() + context.calculateUniqKey()).replaceAll("<<", "").replaceAll("/", "").replaceAll("}", "")
+        return new Handlebars.SafeString((context.getFullPath() + context.calculateUniqKey()).replaceAll("<<", "").replaceAll("/", "").replaceAll("}", "").replaceAll("\\{", "")
             .replaceAll(":", "")
             .replaceAll("\\+", "")
             .replaceAll("\\{", "").replaceAll("\\\\", ""));
@@ -902,38 +902,42 @@ public class MasterDocGenerator {
       @Override
       public CharSequence apply(String context, Options options) throws IOException {
 
-        JSONObject jso = new JSONObject();
-        JSONArray jsa = null;
-        if (context.startsWith(JAVA_UTIL_HASH_MAP) ||
-            context.startsWith(JAVA_UTIL_SET) ||
-            context.startsWith(JAVA_UTIL_LIST)) {
-          jsa = new JSONArray();
-          final int beginIndex = context.indexOf("<") + 1;
-          final int finishIndex = context.indexOf(">");
-          context = context.substring(beginIndex, finishIndex);
-        }
-        final AbstractEntity entity = extractEntity(context);
-        if (null != entity) {
-          if (entity instanceof Entity) {
-            try {
-              final HashMap<String, Integer> depthObj = new HashMap<String, Integer>();
-              final Object jsonFromEntity = getJSONFromEntity((Entity) entity, depthObj);
-              if (jsonFromEntity instanceof JSONObject) {
-                jso = (JSONObject) jsonFromEntity;
-              } else {
-                jsa = (JSONArray) jsonFromEntity;
-              }
-            } catch (JSONException e) {
-
-            }
-            if (null != jsa) {
-              jsa.put(jso);
-              return jsa.toString();
-            }
-            return jso.toString();
-          } else {
-            return ((Enumeration) entity).getValues().get(0);
+        try {
+          JSONObject jso = new JSONObject();
+          JSONArray jsa = null;
+          if (context.startsWith(JAVA_UTIL_HASH_MAP) ||
+              context.startsWith(JAVA_UTIL_SET) ||
+              context.startsWith(JAVA_UTIL_LIST)) {
+            jsa = new JSONArray();
+            final int beginIndex = context.indexOf("<") + 1;
+            final int finishIndex = context.indexOf(">");
+            context = context.substring(beginIndex, finishIndex);
           }
+          final AbstractEntity entity = extractEntity(context);
+          if (null != entity) {
+            if (entity instanceof Entity) {
+              try {
+                final HashMap<String, Integer> depthObj = new HashMap<String, Integer>();
+                final Object jsonFromEntity = getJSONFromEntity((Entity) entity, depthObj);
+                if (jsonFromEntity instanceof JSONObject) {
+                  jso = (JSONObject) jsonFromEntity;
+                } else {
+                  jsa = (JSONArray) jsonFromEntity;
+                }
+              } catch (JSONException e) {
+
+              }
+              if (null != jsa) {
+                jsa.put(jso);
+                return jsa.toString();
+              }
+              return jso.toString();
+            } else {
+              return ((Enumeration) entity).getValues().get(0);
+            }
+          }
+        } catch (Exception e) {
+          return context;
         }
         return null;
       }
@@ -997,7 +1001,9 @@ public class MasterDocGenerator {
       final String superClass = myEntity.getSuperClass();
       if (null != superClass) {
         final AbstractEntity superClassEntity = extractEntity(superClass);
-        jsonObject = enrichWithFields(jsonObject, (Entity) superClassEntity, depthObj);
+        if (null != superClassEntity) {
+          jsonObject = enrichWithFields(jsonObject, (Entity) superClassEntity, depthObj);
+        }
       }
       // Class
       jsonObject = enrichWithFields(jsonObject, myEntity, depthObj);

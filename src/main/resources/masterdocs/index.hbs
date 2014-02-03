@@ -36,7 +36,6 @@
     <script type="text/javascript" src="./js/html5shiv.js"></script>
     <script type="text/javascript" src="./js/jsonformatter.js"></script>
 
-    <script type="text/javascript" src="./js/ink.toggle.js"></script>
 
     <style type="text/css">
         body {
@@ -126,10 +125,10 @@
         }
         $(document).ready(function () {
             var hash = location.hash;
-            if (hash != "") {
+            if (hash != "" && hash.indexOf("-modal")>0) {
                 new Ink.UI.Modal(hash).open();
             }
-            $('.clickable').click(function () {
+            $('.action').click(function () {
                 location.hash = this.id.replace("toggle", "modal");
             });
         });
@@ -173,7 +172,7 @@
                                 <li class="entryListRow">{{{decorate @key}}}
                                     <span class="verbContainer">
                                         {{#each this}}
-                                            <span class="clickable ink-label {{getLabelColor this}}"
+                                            <span class="clickable action ink-label {{getLabelColor this}}"
                                                   id="{{generateResEntryID this}}-toggle">{{verb}}</span>
                                         {{/each}}
                                     </span>
