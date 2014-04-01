@@ -456,6 +456,11 @@ public class MasterDocGenerator {
             entityClass.getDeclaredMethod(IS_PREFIX + name); // GET OR IS
             return true;
           } catch (NoSuchMethodException exec) {
+            try {
+              entityClass.getDeclaredMethod(name); // just name
+              return true;
+            } catch (NoSuchMethodException nsme) {
+            }
           }
         }
         consoleLogger.debug(format(">>>>Bypass : {0}.{1}", entityClass.toString(), name));
