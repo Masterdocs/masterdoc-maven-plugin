@@ -23,11 +23,11 @@ import java.util.zip.ZipFile;
 
 import javax.ws.rs.*;
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlTransient;
 
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.project.MavenProject;
-import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
@@ -217,7 +217,7 @@ public class MasterDocGenerator {
       Entity newEntity = new Entity();
       if (!entity.toString().startsWith(JAVA)) {
 
-        newEntity.setName(entity.toString().replaceAll("\\$","."));
+        newEntity.setName(entity.toString().replaceAll("\\$", "."));
 
         if (entityClass.isEnum()) {
           extractEnumFields(entity);
@@ -399,7 +399,11 @@ public class MasterDocGenerator {
       boolean bypass = false;
       String name = null;
       for (Annotation annotation : declaredAnnotations) {
-        if (annotation instanceof JsonIgnore) {
+
+        if (annotation.toString().contains("JsonIgnore")) {
+          bypass = true;
+        }
+        if (annotation instanceof XmlTransient) {
           bypass = true;
         }
         if (annotation instanceof XmlElement) {
@@ -487,10 +491,10 @@ public class MasterDocGenerator {
     AbstractEntity field;
     if (null != currEntityClass && currEntityClass.isEnum()) {
       field = new Enumeration();
-      field.setName(typeDisplay.replaceAll("\\$","."));
+      field.setName(typeDisplay.replaceAll("\\$", "."));
     } else {
       field = new Entity();
-      field.setName(typeDisplay.replaceAll("\\$","."));
+      field.setName(typeDisplay.replaceAll("\\$", "."));
     }
     fields.put(name, field);
   }
@@ -517,7 +521,7 @@ public class MasterDocGenerator {
     final Object[] declaredEnumConstants = entityClass.getFields();
     // final Object[] declaredEnumConstants = entityClass.getEnumConstants();
     Enumeration newEnumeration = new Enumeration();
-    newEnumeration.setName(entityString.replaceAll("\\$","."));
+    newEnumeration.setName(entityString.replaceAll("\\$", "."));
     for (int i = 0; i < declaredEnumConstants.length; i++) {
       values.add(extractName(declaredEnumConstants[i].toString()));
     }
@@ -879,7 +883,8 @@ public class MasterDocGenerator {
     handlebars.registerHelper("generateResEntryID", new Helper<ResourceEntry>() {
       @Override
       public CharSequence apply(ResourceEntry context, Options options) throws IOException {
-        return new Handlebars.SafeString((context.getFullPath() + context.calculateUniqKey()).replaceAll("<<", "").replaceAll("/", "").replaceAll("}", "").replaceAll("\\{", "")
+        return new Handlebars.SafeString((context.getFullPath() + context.calculateUniqKey()).replaceAll("<<", "").replaceAll("/", "").replaceAll("}", "")
+            .replaceAll("\\{", "")
             .replaceAll(":", "")
             .replaceAll("\\+", "")
             .replaceAll("\\{", "").replaceAll("\\\\", ""));
