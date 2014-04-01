@@ -208,21 +208,26 @@ public class MasterDocGenerator {
         .hasNext();) {
       Serializable entity = iterator.next();
       final Class<?> entityClass;
+      String entityToString = entity.toString();
       try {
-        entityClass = Class.forName(entity.toString(), true, newClassLoader);
+        if (entityToString.startsWith(JAVA_UTIL_LIST)) {
+          entityToString = entityToString.substring(JAVA_UTIL_LIST.length() + 1, entityToString.length() - 1);
+        }
+        entityClass = Class.forName(entityToString, true, newClassLoader);
+
       } catch (Exception e) {
-        consoleLogger.debug(format("{0} is not forNamable", entity.toString()));
+        consoleLogger.debug(format("{0} is not forNamable", entityToString));
         continue;
       }
       Entity newEntity = new Entity();
-      if (!entity.toString().startsWith(JAVA)) {
+      if (!entityToString.startsWith(JAVA)) {
 
-        newEntity.setName(entity.toString().replaceAll("\\$", "."));
+        newEntity.setName(entityToString.replaceAll("\\$", "."));
 
         if (entityClass.isEnum()) {
           extractEnumFields(entity);
         } else {
-          newEntity.setFields(extractFields(entity));
+          newEntity.setFields(extractFields(entityClass));
           final Class<?> superclass = entityClass.getSuperclass();
           if (!JAVA_LANG_OBJECT.equals(superclass.getName())) {
             newEntity.setSuperClass(superclass.getName());
@@ -380,15 +385,14 @@ public class MasterDocGenerator {
   /**
    * Method to extract the class values.
    * 
-   * @param entity
+   * @param entityClass
    * @return
    * @throws ClassNotFoundException
    * @throws IntrospectionException
    */
-  private Map<String, AbstractEntity> extractFields(Serializable entity)
+  private Map<String, AbstractEntity> extractFields(Class<?> entityClass)
       throws ClassNotFoundException, IntrospectionException {
     Map<String, AbstractEntity> fields = new HashMap<String, AbstractEntity>();
-    final Class<?> entityClass = Class.forName(entity.toString(), true, newClassLoader);
     consoleLogger.debug(format(">>Extract fields for class {0} ...", entityClass));
 
     final java.lang.reflect.Field[] declaredFields = entityClass
