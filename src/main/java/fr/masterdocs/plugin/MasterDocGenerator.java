@@ -1,10 +1,26 @@
 package fr.masterdocs.plugin;
 
-import static com.google.common.base.Defaults.defaultValue;
-import static java.io.File.separator;
-import static java.text.MessageFormat.format;
-import static org.springframework.util.StringUtils.capitalize;
+import com.github.jknack.handlebars.*;
+import com.github.jknack.handlebars.io.FileTemplateLoader;
+import com.google.common.base.Function;
+import com.google.common.collect.ImmutableSortedSet;
+import com.google.common.collect.Ordering;
+import com.googlecode.gentyref.GenericTypeReflector;
+import fr.masterdocs.pojo.*;
+import fr.masterdocs.pojo.Enumeration;
+import org.apache.http.client.utils.URIBuilder;
+import org.apache.maven.artifact.Artifact;
+import org.apache.maven.project.MavenProject;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jettison.json.JSONArray;
+import org.codehaus.jettison.json.JSONException;
+import org.codehaus.jettison.json.JSONObject;
+import org.codehaus.plexus.logging.console.ConsoleLogger;
+import org.reflections.Reflections;
 
+import javax.ws.rs.*;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlTransient;
 import java.beans.IntrospectionException;
 import java.io.*;
 import java.lang.annotation.Annotation;
@@ -21,29 +37,10 @@ import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
-import javax.ws.rs.*;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlTransient;
-
-import org.apache.http.client.utils.URIBuilder;
-import org.apache.maven.artifact.Artifact;
-import org.apache.maven.project.MavenProject;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jettison.json.JSONArray;
-import org.codehaus.jettison.json.JSONException;
-import org.codehaus.jettison.json.JSONObject;
-import org.codehaus.plexus.logging.console.ConsoleLogger;
-import org.reflections.Reflections;
-
-import com.github.jknack.handlebars.*;
-import com.github.jknack.handlebars.io.FileTemplateLoader;
-import com.google.common.base.Function;
-import com.google.common.collect.ImmutableSortedSet;
-import com.google.common.collect.Ordering;
-import com.googlecode.gentyref.GenericTypeReflector;
-
-import fr.masterdocs.pojo.*;
-import fr.masterdocs.pojo.Enumeration;
+import static com.google.common.base.Defaults.defaultValue;
+import static java.io.File.separator;
+import static java.text.MessageFormat.format;
+import static org.springframework.util.StringUtils.capitalize;
 
 public class MasterDocGenerator {
 
@@ -840,16 +837,16 @@ public class MasterDocGenerator {
     handlebars.registerHelper("getLabelColor", new Helper<ResourceEntry>() {
       @Override
       public CharSequence apply(ResourceEntry entry, Options options) throws IOException {
-        if ("GET".equals(entry.getVerb())) {
+          if (GET.equals(entry.getVerb())) {
           return "info";
         }
-        if ("DELETE".equals(entry.getVerb())) {
+          if (DELETE.equals(entry.getVerb())) {
           return "error";
         }
-        if ("POST".equals(entry.getVerb())) {
+          if (POST.equals(entry.getVerb())) {
           return "success";
         }
-        if ("PUT".equals(entry.getVerb())) {
+          if (PUT.equals(entry.getVerb())) {
           return "warning";
         }
         return "info";
