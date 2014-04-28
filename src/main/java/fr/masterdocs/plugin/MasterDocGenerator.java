@@ -257,7 +257,7 @@ public class MasterDocGenerator {
 
   /**
    * Get all @Path class and export all methods
-   * 
+   *
    * @throws NoSuchFieldException
    * @throws SecurityException
    */
@@ -381,7 +381,7 @@ public class MasterDocGenerator {
 
   /**
    * Method to extract the class values.
-   * 
+   *
    * @param entityClass
    * @return
    * @throws ClassNotFoundException
@@ -389,7 +389,7 @@ public class MasterDocGenerator {
    */
   private Map<String, AbstractEntity> extractFields(Class<?> entityClass)
       throws ClassNotFoundException, IntrospectionException {
-    Map<String, AbstractEntity> fields = new HashMap<String, AbstractEntity>();
+      Map<String, AbstractEntity> fields = new TreeMap<String, AbstractEntity>();
     consoleLogger.debug(format(">>Extract fields for class {0} ...", entityClass));
 
     final java.lang.reflect.Field[] declaredFields = entityClass
@@ -502,7 +502,7 @@ public class MasterDocGenerator {
 
   /**
    * Method to extract the enuration values.
-   * 
+   *
    * @param entity
    * @return
    * @throws ClassNotFoundException
@@ -510,7 +510,7 @@ public class MasterDocGenerator {
    */
   private Map<String, AbstractEntity> extractEnumFields(Serializable entity)
       throws ClassNotFoundException, IntrospectionException {
-    Map<String, AbstractEntity> fields = new HashMap<String, AbstractEntity>();
+      Map<String, AbstractEntity> fields = new TreeMap<String, AbstractEntity>();
     List<String> values = new ArrayList<String>();
     String entityString = entity.toString();
     if (entityString.startsWith(CLASS)) {
@@ -928,7 +928,7 @@ public class MasterDocGenerator {
           if (null != entity) {
             if (entity instanceof Entity) {
               try {
-                final HashMap<String, Integer> depthObj = new HashMap<String, Integer>();
+                  final TreeMap<String, Integer> depthObj = new TreeMap<String, Integer>();
                 final Object jsonFromEntity = getJSONFromEntity((Entity) entity, depthObj);
                 if (jsonFromEntity instanceof JSONObject) {
                   jso = (JSONObject) jsonFromEntity;
@@ -983,7 +983,7 @@ public class MasterDocGenerator {
     return newIndex;
   }
 
-  private Object getJSONFromEntity(Entity entity, HashMap<String, Integer> depthObj) throws JSONException {
+    private Object getJSONFromEntity(Entity entity, TreeMap<String, Integer> depthObj) throws JSONException {
 
     JSONObject jsonObject = new JSONObject();
     JSONArray jsa = null;
@@ -1062,7 +1062,8 @@ public class MasterDocGenerator {
     return null;
   }
 
-  private JSONObject enrichWithFields(JSONObject parent, Entity entity, HashMap<String, Integer> depthObj) throws JSONException {
+    private JSONObject enrichWithFields(JSONObject parent, Entity entity, TreeMap<String, Integer> depthObj)
+        throws JSONException {
     final Map<String, AbstractEntity> fields = entity.getFields();
     if (fields != null && fields.keySet() != null) {
       final Iterator<String> iterator = fields.keySet().iterator();
