@@ -2857,6 +2857,10 @@ hr {
     padding: 0;
 }
 
+.ink-label.grey {
+    background-color: #b3b3b3;
+}
+
 footer {
     border-top: 1px solid #cccccc;
     background: #f0f0f0;
