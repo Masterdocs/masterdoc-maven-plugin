@@ -53,7 +53,6 @@ public class MasterDocGenerator {
     public static final String MASTERDOC_JSON_FILENAME = "masterdocs.json";
     public static final String PATH_PARAM = "PathParam";
     public static final String QUERY_PARAM = "QueryParam";
-    public static final String JAVA_UTIL_HASH_MAP = "java.util.HashMap";
     public static final String GET = "GET";
     public static final String POST = "POST";
     public static final String PUT = "PUT";
@@ -72,8 +71,11 @@ public class MasterDocGenerator {
     public static final String DOT = ".";
     public static final String COMMA = ",";
     public static final String MASTERDOCS_DIR = "masterdocs";
+    public static final String JAVA_UTIL_HASH_MAP = "java.util.HashMap";
+    public static final String JAVA_UTIL_MAP = "java.util.Map";
     private static final String JAVA_UTIL_LIST = "java.util.List";
     private static final String JAVA_UTIL_SET = "java.util.Set";
+    private static final String JAVA_UTIL_COLLECTION = "java.util.Collection";
     public Integer MAX_DEPTH = 1;
 
     // ----------------------------------------------------------------------
@@ -992,8 +994,10 @@ public class MasterDocGenerator {
         JSONArray jsa = null;
         String name = entity.getName();
         if (name.startsWith(JAVA_UTIL_HASH_MAP) ||
+                name.startsWith(JAVA_UTIL_MAP) ||
                 name.startsWith(JAVA_UTIL_SET) ||
-                name.startsWith(JAVA_UTIL_LIST)) {
+                name.startsWith(JAVA_UTIL_LIST) ||
+                name.startsWith(JAVA_UTIL_COLLECTION)) {
             jsa = new JSONArray();
             final int beginIndex = name.indexOf("<") + 1;
             final int finishIndex = name.indexOf(">");
@@ -1024,6 +1028,12 @@ public class MasterDocGenerator {
         } else {
             // Maybe a JDK type, trying to instanciate
             Class aClass = null;
+            if ("java.lang.Double".equals(name)) {
+                name = "double";
+            } else if ("java.lang.Integer".equals(name)) {
+                name = "int";
+            }
+
             try {
                 aClass = Class.forName(name);
             } catch (ClassNotFoundException e) {
@@ -1041,6 +1051,8 @@ public class MasterDocGenerator {
                     aClass = float.class;
                 } else if ("double".equals(name)) {
                     aClass = double.class;
+                } else if ("float".equals(name)) {
+                    aClass = float.class;
                 }
             }
             try {
