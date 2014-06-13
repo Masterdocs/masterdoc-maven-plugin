@@ -147,18 +147,17 @@
         </h1>
     </header>
     <div class="column-group gutters">
-        <div class="large-20 medium-25 small-100">
+        <div class="large-10 medium-25 small-100">
             <nav class="ink-navigation sticky" data-offset-top="70px" data-offset-bottom="350px" id="alerts_menu">
-                <ul class="menu vertical grey flat rounded">
-                    <li class=""><a class="scrollableLink" href="#header"><span class="icon-chevron-up"></span> Back to
-                        Top</a></li>
+                <ul class="menu vertical grey flat rounded" style="width:100px">
+                    <li class=""><a class="scrollableLink" href="#header"><span class="icon-chevron-up"></span></a></li>
                     <li class="active"><a class="scrollableLink" href="#nav-resources">Resources</a></li>
                     <li class=""><a class="scrollableLink" href="#nav-entities">Entities</a></li>
                 </ul>
             </nav>
         </div>
-        <div class="large-80 medium-75 small-100">
-            <section id="nav-resources" data-spy="true" data-target="#alerts_menu">
+        <div class="large-90 medium-75 small-100">
+        <section id="nav-resources" data-spy="true" data-target="#alerts_menu">
                 <h2>Resources</h2>
                 {{#each resources}}
                     <dl id="{{rootPath}}" class="box">
