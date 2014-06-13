@@ -1004,6 +1004,11 @@ public class MasterDocGenerator {
             name = name.substring(beginIndex, finishIndex);
         }
 
+        if (name.endsWith("[]")) {
+            jsa = new JSONArray();
+            name = name.substring(0, name.length() - 2);
+        }
+
         final AbstractEntity extractEntity = extractEntity(name);
         if (null != extractEntity) {
             if (!depthObj.containsKey(name)) {
