@@ -251,9 +251,10 @@
                                                        <span class="ink-badge black"><i
                                                                class="icon-chevron-sign-left"></i> Request</span>
                                             {{#if requestEntity}}
-                                                {{requestEntity}} <span
-                                                    class="ink-badge grey clickable"
-                                                    onclick="revealJSON($(this));">JSON</span>
+                                                <span
+                                                        class="ink-badge grey clickable"
+                                                        onclick="revealJSON($(this));">JSON</span>
+                                                {{requestEntity}}
 
                                                 <div class="json-source hide-all">
                                                     {{{JSON requestEntity}}}
@@ -286,10 +287,10 @@
                                                        <span class="ink-badge black"><i
                                                                class="icon-chevron-sign-right"></i> Response</span>
                                             {{#if responseEntity}}
-                                                {{responseEntity}}<span
+                                                <span
                                                     class="ink-badge grey clickable"
                                                     onclick="revealJSON($(this));">JSON</span>
-
+                                                {{responseEntity}}
                                                 <div class="json-source hide-all">
                                                     {{{JSON responseEntity}}}
                                                 </div>
