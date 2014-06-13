@@ -254,7 +254,7 @@
                                                 <span
                                                         class="ink-badge grey clickable"
                                                         onclick="revealJSON($(this));">JSON</span>
-                                                {{requestEntity}}
+                                                <span style=" text-overflow: ellipsis;word-wrap: break-word;">{{responseEntity}}</span>
 
                                                 <div class="json-source hide-all">
                                                     {{{JSON requestEntity}}}
@@ -290,7 +290,8 @@
                                                 <span
                                                     class="ink-badge grey clickable"
                                                     onclick="revealJSON($(this));">JSON</span>
-                                                {{responseEntity}}
+                                                <span style=" text-overflow: ellipsis;word-wrap: break-word;">{{responseEntity}}</span>
+
                                                 <div class="json-source hide-all">
                                                     {{{JSON responseEntity}}}
                                                 </div>
