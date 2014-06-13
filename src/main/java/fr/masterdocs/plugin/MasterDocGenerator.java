@@ -1032,6 +1032,16 @@ public class MasterDocGenerator {
                 name = "double";
             } else if ("java.lang.Integer".equals(name)) {
                 name = "int";
+            } else if ("java.lang.Boolean".equals(name)) {
+                name = "boolean";
+            } else if ("java.lang.Byte".equals(name)) {
+                name = "byte";
+            } else if ("java.lang.Short".equals(name)) {
+                name = "short";
+            } else if ("java.lang.Long".equals(name)) {
+                name = "long";
+            } else if ("java.lang.Float".equals(name)) {
+                name = "float";
             }
 
             try {
@@ -1047,8 +1057,6 @@ public class MasterDocGenerator {
                     aClass = int.class;
                 } else if ("long".equals(name)) {
                     aClass = long.class;
-                } else if ("long".equals(name)) {
-                    aClass = float.class;
                 } else if ("double".equals(name)) {
                     aClass = double.class;
                 } else if ("float".equals(name)) {
