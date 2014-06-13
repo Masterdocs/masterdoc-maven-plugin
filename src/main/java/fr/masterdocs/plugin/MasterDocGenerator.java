@@ -922,8 +922,10 @@ public class MasterDocGenerator {
                     JSONObject jso = new JSONObject();
                     JSONArray jsa = null;
                     if (context.startsWith(JAVA_UTIL_HASH_MAP) ||
+                            context.startsWith(JAVA_UTIL_MAP) ||
                             context.startsWith(JAVA_UTIL_SET) ||
-                            context.startsWith(JAVA_UTIL_LIST)) {
+                            context.startsWith(JAVA_UTIL_LIST) ||
+                            context.startsWith(JAVA_UTIL_COLLECTION)) {
                         jsa = new JSONArray();
                         final int beginIndex = context.indexOf("<") + 1;
                         final int finishIndex = context.indexOf(">");
@@ -965,8 +967,10 @@ public class MasterDocGenerator {
             public CharSequence apply(AbstractEntity context, Options options) throws IOException {
                 String name = context.getName();
                 if (name.startsWith(JAVA_UTIL_HASH_MAP) ||
+                        name.startsWith(JAVA_UTIL_MAP) ||
                         name.startsWith(JAVA_UTIL_SET) ||
-                        name.startsWith(JAVA_UTIL_LIST)) {
+                        name.startsWith(JAVA_UTIL_LIST) ||
+                        name.startsWith(JAVA_UTIL_COLLECTION)) {
 
                     final int beginIndex = name.indexOf("<") + 1;
                     final int finishIndex = name.indexOf(">");
