@@ -285,17 +285,17 @@ window.PR_SHOULD_USE_CONTINUATION = !0;
             I, J, v], hashComments: !0, cStyleComments: !0, multiLineStrings: !0, regexLiterals: !0}), A = {};
     k(O, ["default-code"]);
     k(x([], [
-        ["pln", /^[^<?]+/],
-        ["dec", /^<!\w[^>]*(?:>|$)/],
-        ["com", /^<\!--[\S\s]*?(?:--\>|$)/],
-        ["lang-", /^<\?([\S\s]+?)(?:\?>|$)/],
-        ["lang-", /^<%([\S\s]+?)(?:%>|$)/],
-        ["pun", /^(?:<[%?]|[%?]>)/],
-        ["lang-", /^<xmp\b[^>]*>([\S\s]+?)<\/xmp\b[^>]*>/i],
-        ["lang-js", /^<script\b[^>]*>([\S\s]*?)(<\/script\b[^>]*>)/i],
-        ["lang-css", /^<style\b[^>]*>([\S\s]*?)(<\/style\b[^>]*>)/i],
-        ["lang-in.tag", /^(<\/?[a-z][^<>]*>)/i]
-    ]),
+            ["pln", /^[^<?]+/],
+            ["dec", /^<!\w[^>]*(?:>|$)/],
+            ["com", /^<\!--[\S\s]*?(?:--\>|$)/],
+            ["lang-", /^<\?([\S\s]+?)(?:\?>|$)/],
+            ["lang-", /^<%([\S\s]+?)(?:%>|$)/],
+            ["pun", /^(?:<[%?]|[%?]>)/],
+            ["lang-", /^<xmp\b[^>]*>([\S\s]+?)<\/xmp\b[^>]*>/i],
+            ["lang-js", /^<script\b[^>]*>([\S\s]*?)(<\/script\b[^>]*>)/i],
+            ["lang-css", /^<style\b[^>]*>([\S\s]*?)(<\/style\b[^>]*>)/i],
+            ["lang-in.tag", /^(<\/?[a-z][^<>]*>)/i]
+        ]),
         ["default-markup", "htm", "html", "mxml", "xhtml", "xml", "xsl"]);
     k(x([
         ["pln", /^\s+/, q, " \t\r\n"],

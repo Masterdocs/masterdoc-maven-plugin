@@ -44,8 +44,8 @@
                 var frag = document.createDocumentFragment();
                 return (
                     typeof frag.cloneNode == 'undefined' ||
-                        typeof frag.createDocumentFragment == 'undefined' ||
-                        typeof frag.createElement == 'undefined'
+                    typeof frag.createDocumentFragment == 'undefined' ||
+                    typeof frag.createElement == 'undefined'
                     );
             }());
         } catch (e) {
@@ -184,15 +184,15 @@
         };
 
         ownerDocument.createDocumentFragment = Function('h,f', 'return function(){' +
-            'var n=f.cloneNode(),c=n.createElement;' +
-            'h.shivMethods&&(' +
-            // unroll the `createElement` calls
-            getElements().join().replace(/\w+/g, function (nodeName) {
-                data.createElem(nodeName);
-                data.frag.createElement(nodeName);
-                return 'c("' + nodeName + '")';
-            }) +
-            ');return n}'
+                'var n=f.cloneNode(),c=n.createElement;' +
+                'h.shivMethods&&(' +
+                // unroll the `createElement` calls
+                getElements().join().replace(/\w+/g, function (nodeName) {
+                    data.createElem(nodeName);
+                    data.frag.createElement(nodeName);
+                    return 'c("' + nodeName + '")';
+                }) +
+                ');return n}'
         )(html5, data.frag);
     }
 
@@ -213,7 +213,7 @@
         if (html5.shivCSS && !supportsHtml5Styles && !data.hasCSS) {
             data.hasCSS = !!addStyleSheet(ownerDocument,
                 // corrects block display not defined in IE6/7/8/9
-                'article,aside,figcaption,figure,footer,header,hgroup,nav,section{display:block}' +
+                    'article,aside,figcaption,figure,footer,header,hgroup,nav,section{display:block}' +
                     // adds styling not present in IE6/7/8/9
                     'mark{background:#FF0;color:#000}'
             );

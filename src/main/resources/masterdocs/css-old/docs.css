@@ -445,7 +445,7 @@ footer .vspace {
 }
 
 footer .copyright .SAPOlogo {
-    background: url("../img/SAPOlogo.png") no-repeat scroll 0 0 transparent;
+    background: url("../img-old/SAPOlogo.png") no-repeat scroll 0 0 transparent;
     text-indent: -9999px;
     display: block;
     width: 101px;
@@ -458,7 +458,7 @@ footer .copyright .PTClogo {
 }
 
 footer .copyright .PTClogo a {
-    background: url("../img/icon_Sprite.png") no-repeat 0 top;
+    background: url("../img-old/icon_Sprite.png") no-repeat 0 top;
     text-indent: -9999px;
     display: block;
     float: left;
@@ -479,15 +479,15 @@ footer .sociallinks li a {
 }
 
 footer .sociallinks li a.Fb_link {
-    background: url("../img/icon_Sprite.png") no-repeat 0 -90px;
+    background: url("../img-old/icon_Sprite.png") no-repeat 0 -90px;
 }
 
 footer .sociallinks li a.Twt_link {
-    background: url("../img/icon_Sprite.png") no-repeat 0 -118px;
+    background: url("../img-old/icon_Sprite.png") no-repeat 0 -118px;
 }
 
 footer .sociallinks li a.Gplus_link {
-    background: url("../img/icon_Sprite.png") no-repeat 0 -146px;
+    background: url("../img-old/icon_Sprite.png") no-repeat 0 -146px;
 }
 
 footer .ink-navigation ul.menu.horizontal li a.license {
