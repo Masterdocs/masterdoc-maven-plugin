@@ -12,32 +12,96 @@
     <meta name="HandheldFriendly" content="True">
     <meta name="MobileOptimized" content="320">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
-    <link rel="shortcut icon" href="./img/favicon.ico" type="image/x-icon">
-    <link rel="icon" href="./img/favicon.ico" type="image/x-icon">
-
-    <link rel="shortcut icon" href="./img/favicon.ico">
-    <link rel="apple-touch-icon" sizes="114x114" href="./img/apple-touch-icon-114x114.png">
-    <link rel="apple-touch-icon" sizes="72x72" href="./img/apple-touch-icon-72x72.png">
-    <link rel="apple-touch-icon" href="./img/apple-touch-icon-57x57.png">
-
     <link rel="stylesheet" type="text/css" href="./css/ink.css">
-    <link rel="stylesheet" type="text/css" href="./css/jsonFormatter.css">
-
-    <!--[if IE 7 ]>
-    <link rel="stylesheet" href="./css/ink-ie7.css" type="text/css" media="screen" title="no title" charset="utf-8">
+    <!-- inks css file -->
+    <link rel="stylesheet" type="text/css" href="./js/jsonFormatter.css">
+    <link rel="stylesheet" href="./font-awesome/css/font-awesome.min.css">
+    <!--[if lt IE 9 ]>
+    <link rel="stylesheet" href="./css/ink-ie.css" type="text/css" media="screen" title="no title" charset="utf-8">
     <![endif]-->
 
-    <script src="http://code.jquery.com/jquery-git1.js"></script>
-    <script type="text/javascript" src="./js/holder.js"></script>
-    <script type="text/javascript" src="./js/ink.min.js"></script>
-    <script type="text/javascript" src="./js/ink-ui.min.js"></script>
-    <script type="text/javascript" src="./js/autoload.js"></script>
-    <script type="text/javascript" src="./js/prettify.js"></script>
-    <script type="text/javascript" src="./js/html5shiv.js"></script>
+    <script src="./js/jquery.2.1.1.min.js"></script>
+    <style type="text/css"></style>
     <script type="text/javascript" src="./js/jsonformatter.js"></script>
 
+    <!-- test browser flexbox support and load legacy grid if unsupported -->
+    <script type="text/javascript" src="./js/modernizr.js"></script>
+    <script type="text/javascript">
+        Modernizr.load({
+            test: Modernizr.flexbox,
+            nope: './css/ink-legacy.min.css'
+        });
+    </script>
 
-    <style type="text/css">
+    <!-- load inks javascript files from the cdn -->
+    <script type="text/javascript" src="./js/holder.js"></script>
+    <script type="text/javascript" src="./js/ink-all.min.js"></script>
+    <script type="text/javascript" src="./js/autoload.js"></script>
+
+
+    <style>
+        .screen-size-helper {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            width: 100%;
+            line-height: 1.6em;
+            font-size: 1em;
+            padding: 0.5333333333333333em 0.8em;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 100;
+        }
+
+        .screen-size-helper .title,
+        .screen-size-helper ul {
+            color: white;
+            text-shadow: 0 1px 0 #000000;
+        }
+
+        .screen-size-helper .title {
+            font-size: inherit;
+            line-height: inherit;
+            float: left;
+            text-transform: uppercase;
+            font-weight: 500;
+        }
+
+        .screen-size-helper ul {
+            float: right;
+            margin: 0;
+            padding: 0;
+            line-height: inherit !important;
+        }
+
+        .screen-size-helper ul li {
+            padding: 0;
+            margin: 0;
+            text-transform: uppercase;
+            font-weight: bold;
+            font-size: inherit !important;
+        }
+
+        .screen-size-helper ul li.tiny {
+            color: #0f75da;
+        }
+
+        .screen-size-helper ul li.small {
+            color: #4a9b17;
+        }
+
+        .screen-size-helper ul li.medium {
+            color: #ff9c00;
+        }
+
+        .screen-size-helper ul li.large {
+            color: #c91111;
+        }
+
+        .screen-size-helper ul li.xlarge {
+            color: white;
+        }
+
         body {
             background: #ededed;
         }
@@ -67,20 +131,18 @@
             margin: 0;
         }
 
-        .box {
-            border-radius: 4px;
-            -webkit-box-shadow: 0 2px 3px 0 #dddddd;
-            -moz-box-shadow: 0 2px 3px 0 #dddddd;
-            box-shadow: 0 2px 3px 0 #dddddd;
-            border: 1px solid #BBB;
-            background-color: #FFF;
-            padding: 1em;
-            margin-top: 1em;
-        }
-
         .logo {
             width: 128px;
             vertical-align: middle;
+        }
+
+        .json-source {
+            display: none;
+        }
+
+        .json-dest {
+            font-family: monospace;
+            white-space: pre;
         }
 
         .clickable {
@@ -100,14 +162,15 @@
             list-style: none !important;
         }
 
-        .json-source {
-            display: none;
-        }
-
-        .json-dest {
-            font-family: monospace;
-            white-space: pre;
-        / / or pre-wrap / / All fails without this one !
+        .box-entry {
+            border-radius: 4px;
+            -webkit-box-shadow: 0 2px 3px 0 #dddddd;
+            -moz-box-shadow: 0 2px 3px 0 #dddddd;
+            box-shadow: 0 2px 3px 0 #dddddd;
+            border: 1px solid #BBB;
+            background-color: #FFF;
+            padding: 1em;
+            margin-top: 1em;
         }
     </style>
     <script>
@@ -117,15 +180,14 @@
             var $src = $parent.find('.json-source');
             if ($dest.is(':visible')) {
                 $dest.html("");
-                $dest.hide();
             } else {
                 $dest.jsonFormat($src);
-                $dest.show();
             }
+            $dest.toggleClass("hide-all");
         }
         $(document).ready(function () {
             var hash = location.hash;
-            if (hash != "" && hash.indexOf("-modal")>0) {
+            if (hash != "" && hash.indexOf("-modal") > 0) {
                 new Ink.UI.Modal(hash).open();
             }
             $('.action').click(function () {
@@ -133,37 +195,46 @@
             });
         });
     </script>
-</head>
 
 <body>
+<!--[if lte IE 9 ]>
+      <div class="ink-alert basic" role="alert">
+          <button class="ink-dismiss">&times;</button>
+            <p>
+                <strong>You are using an outdated Internet Explorer version.</strong>
+                Please <a href="http://browsehappy.com/">upgrade to a modern browser</a> to improve your web experience.
+            </p>
+        </div>
+        -->
+<header class="ink-grid">
+    <h1 id="header" class="all-100">
+        <img src="./img/masterdocs.png" class="logo">MasterDocs for
+        connect-webservices
+        <small class="tooltip" data-tip-text="com.masternaut.platform.connect.publicapi.connect-webservices.2.60"
+               data-tip-where="down" data-tip-color="grey">Version 2.60
+        </small>
+    </h1>
+</header>
 <div class="ink-grid">
-    <header>
-        <h1 id="header" class="pull-left medium-100 small-100">
-            <img src="./img/masterdocs.png" class="logo"/>MasterDocs for
-            {{metadata.artifactId}}
-            <small class="tooltip" data-tip-text="{{metadata.groupId}}.{{metadata.artifactId}}.{{metadata.version}}"
-                   data-tip-where="down">Version {{metadata.version}}
-            </small>
-        </h1>
-    </header>
     <div class="column-group gutters">
-        <div class="large-10 medium-25 small-100">
-            <nav class="ink-navigation sticky" data-offset-top="70px" data-offset-bottom="350px" id="alerts_menu">
-                <ul class="menu vertical grey flat rounded" style="width:100px">
-                    <li class=""><a class="scrollableLink" href="#header"><span class="icon-chevron-up"></span></a></li>
+        <div class="all-15">
+            <nav class="ink-navigation sticky" id="alerts_menu">
+                <ul class="menu vertical grey">
+                    <li class=""><a class="scrollableLink" href="#header"><span class="fa fa-chevron-up"></span></a>
+                    </li>
                     <li class="active"><a class="scrollableLink" href="#nav-resources">Resources</a></li>
                     <li class=""><a class="scrollableLink" href="#nav-entities">Entities</a></li>
                 </ul>
             </nav>
         </div>
-        <div class="large-90 medium-75 small-100">
-        <section id="nav-resources" data-spy="true" data-target="#alerts_menu">
+        <div class="all-85">
+            <section id="nav-resources" data-spy="true" data-target="#alerts_menu">
                 <h2>Resources</h2>
                 {{#each resources}}
-                    <dl id="{{rootPath}}" class="box">
+                    <dl id="{{rootPath}}" class="box-entry">
                         <dt>{{rootPath}}
                             <button class="toggle" data-target="#{{generateResID this}}-toggle"><i
-                                    class="icon-collapse icon-medium"></i> details
+                                    class="fa fa-caret-square-o-down"></i> details
                             </button>
                         </dt>
                         <ul id="{{generateResID this}}-toggle" class="hide-all unstyled">
@@ -185,16 +256,16 @@
                 <h2>Entities</h2>
 
                 {{#each entities}}
-                    <dl id="{{name}}" class="box">
+                    <dl id="{{name}}" class="entry-box">
                         <dt>
                             {{#isEnum}}
-                                <span class="ink-label info">E</span>
+                                <span class="ink-label blue">E</span>
                             {{else}}
-                                <span class="ink-label warning">C</span>
+                                <span class="ink-label orange">C</span>
                             {{/isEnum}}
                             {{extractName this.name}}
                             <button class="toggle" data-target="#{{extractName this.name}}-toggle">
-                                <i class="icon-collapse"></i> details
+                                <i class="fa fa-caret-square-o-down"></i> details
                             </button>
                         </dt>
                         <div id="{{extractName this.name}}-toggle" class="hide-all">
@@ -207,9 +278,9 @@
                                         {{#each fields}}
                                             <li>
                                                 {{#isEnum}}
-                                                    <span class="ink-label info">E</span>
+                                                    <span class="ink-label blue">E</span>
                                                 {{else}}
-                                                    <span class="ink-label warning">C</span>
+                                                    <span class="ink-label orange">C</span>
                                                 {{/isEnum}}
                                                 Name : {{@key}} - Type : {{{LINK this}}}{{extractName this.name}}
                                                 </a>
@@ -218,11 +289,11 @@
                                     {{else}}
                                         {{#if values}}
                                             {{#each values}}
-                                                <li><i class="icon-circle"></i> {{this}}</li>
+                                                <li><i class="fa fa-circle-o-notch"></i> {{this}}</li>
                                             {{/each}}
                                         {{else}}
-                                            <div class="ink-alert basic warning">
-                                                <p>No field for this entity</p>
+                                            <div class="ink-alert basic orange">
+                                            <p>No field for this entity</p>
                                             </div>
                                         {{/if}}
                                     {{/if}}
@@ -247,12 +318,12 @@
                                         <h3><span class="ink-label {{getLabelColor this}}">{{verb}}</span>
                                             {{{URL this}}} - {{methodName}}</h3>
 
-                                        <div class="box">
-                                                       <span class="ink-badge black"><i
-                                                               class="icon-chevron-sign-left"></i> Request</span>
+                                        <div class="entry-box">
+                                                       <span class="condensed ink-badge black"><i
+                                                               class="fa-arrow-left fa"></i> Request</span>
                                             {{#if requestEntity}}
                                                 <span
-                                                        class="ink-badge grey clickable"
+                                                        class="condensed ink-badge yellow clickable fa fa-magic"
                                                         onclick="revealJSON($(this));">JSON</span>
                                                 <span style=" text-overflow: ellipsis;word-wrap: break-word;">{{responseEntity}}</span>
 
@@ -266,7 +337,7 @@
                                                 <ul class="unstyled ulnostyle">
                                                     {{#each queryParams}}
                                                         <li>
-                                                            <span class="ink-label info">QueryParam</span>
+                                                            <span class="condensed ink-label green">QueryParam</span>
                                                             {{this.name}} ({{extractName this.className}})
                                                         </li>
                                                     {{/each}}
@@ -276,7 +347,7 @@
                                                 <ul class="unstyled ulnostyle">
                                                     {{#each pathParams}}
                                                         <li>
-                                                            <span class="ink-label success">PathParams</span>
+                                                            <span class="condensed ink-label blue">PathParams</span>
                                                             {{this.name}} ({{extractName this.className}})
                                                         </li>
                                                     {{/each}}
@@ -284,12 +355,12 @@
                                             {{/if}}
                                         </div>
                                         <div class="box">
-                                                       <span class="ink-badge black"><i
-                                                               class="icon-chevron-sign-right"></i> Response</span>
+                                                       <span class="condensed ink-badge black"><i
+                                                               class="fa-arrow-right fa "></i> Response</span>
                                             {{#if responseEntity}}
                                                 <span
-                                                    class="ink-badge grey clickable"
-                                                    onclick="revealJSON($(this));">JSON</span>
+                                                        class="condensed ink-badge yellow clickable fa fa-magic"
+                                                        onclick="revealJSON($(this));">JSON</span>
                                                 <span style=" text-overflow: ellipsis;word-wrap: break-word;">{{responseEntity}}</span>
 
                                                 <div class="json-source hide-all">
@@ -316,11 +387,11 @@
 </div>
 <footer>
     <div class="ink-grid">
-        <nav class="ink-navigation push-left medium-100 small-100 small-push-left">
+        <nav class="ink-navigation push-left all-100">
             <ul class="menu horizontal">
-                <li><a href="#">Overview</a></li>
-                <li><a href="#">Resources</a></li>
-                <li><a href="#">Entities</a></li>
+                <li><a href="#header">Overview</a></li>
+                <li><a href="#nav-resources">Resources</a></li>
+                <li><a href="#nav-entities">Entities</a></li>
             </ul>
         </nav>
         <p class="push-right small-100">Generate with <a href="http://www.masterdocs.fr">MasterDocs</a></p>

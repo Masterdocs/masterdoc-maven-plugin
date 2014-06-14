@@ -840,21 +840,21 @@ public class MasterDocGenerator {
             @Override
             public CharSequence apply(ResourceEntry entry, Options options) throws IOException {
                 if (GET.equals(entry.getVerb())) {
-                    return "info";
+                    return "green";
                 }
                 if (DELETE.equals(entry.getVerb())) {
-                    return "error";
+                    return "red";
                 }
                 if (POST.equals(entry.getVerb())) {
-                    return "success";
+                    return "blue";
                 }
                 if (PUT.equals(entry.getVerb())) {
-                    return "warning";
+                    return "orange";
                 }
                 if (OPTIONS.equals(entry.getVerb())) {
                     return "grey";
                 }
-                return "info";
+                return "grey";
             }
         });
 
@@ -1128,10 +1128,10 @@ public class MasterDocGenerator {
     }
 
     private CharSequence decorateURL(String context) {
-        String url = context.replaceAll("\\{", "<span class=\"ink-label success invert\">{")
+        String url = context.replaceAll("\\{", "<span class=\"ink-label green invert\">{")
                 .replaceAll("}", "}</span>")
-                .replaceAll("&", "</span>&<span class=\"ink-label info invert\">")
-                .replaceAll("\\?", "?<span class=\"ink-label info invert\">");
+            .replaceAll("&", "</span>&<span class=\"ink-label blue invert\">")
+            .replaceAll("\\?", "?<span class=\"ink-label blue invert\">");
         if (url.indexOf("?") > -1) {
             url = url + "</span>";
         }
