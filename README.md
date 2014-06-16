@@ -8,7 +8,7 @@ Just add in your api application's <i>pom.xml</i> this plugin :
 <plugin>
     <groupId>fr.masterdocs</groupId>
     <artifactId>masterdoc-maven-plugin</artifactId>
-    <version>1.2</version>
+    <version>2.0</version>
     <executions>
      <execution>
       <phase>install</phase>
