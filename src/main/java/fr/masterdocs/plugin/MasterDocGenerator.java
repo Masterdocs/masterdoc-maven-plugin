@@ -1128,10 +1128,10 @@ public class MasterDocGenerator {
     }
 
     private CharSequence decorateURL(String context) {
-        String url = context.replaceAll("\\{", "<span class=\"ink-label green invert\">{")
+        String url = context.replaceAll("\\{", "<span class=\"ink-label blue invert\">{")
                 .replaceAll("}", "}</span>")
-            .replaceAll("&", "</span>&<span class=\"ink-label blue invert\">")
-            .replaceAll("\\?", "?<span class=\"ink-label blue invert\">");
+                .replaceAll("&", "</span>&<span class=\"ink-label green invert\">")
+                .replaceAll("\\?", "?<span class=\"ink-label green invert\">");
         if (url.indexOf("?") > -1) {
             url = url + "</span>";
         }
