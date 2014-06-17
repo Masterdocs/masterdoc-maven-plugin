@@ -1,178 +1,168 @@
+<?xml version="1.0"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
-    <parent>
-        <groupId>org.sonatype.oss</groupId>
-        <artifactId>oss-parent</artifactId>
-        <version>7</version>
-    </parent>
-    <groupId>fr.masterdocs</groupId>
-    <artifactId>masterdoc-maven-plugin</artifactId>
-    <version>2.2-SNAPSHOT</version>
-    <packaging>maven-plugin</packaging>
-    <developers>
-        <developer>
-            <id>pleresteux</id>
-            <name>Pierre LERESTEUX</name>
-            <email>pierre.leresteux@gmail.com</email>
-            <url>https://github.com/pierreLeresteux</url>
-        </developer>
-    </developers>
-
-    <name>Masterdocs maven plugin</name>
-    <description>Generate the REST documentation of a JAX-RS Application</description>
-
-    <scm>
-        <url>https://github.com/Masterdocs/masterdoc-maven-plugin</url>
-        <connection>scm:git:git@github.com:Masterdocs/masterdoc-maven-plugin.git</connection>
-        <developerConnection>scm:git:git@github.com:Masterdocs/masterdoc-maven-plugin.git</developerConnection>
-    </scm>
-    <properties>
-        <maven-plugin-api.version>3.1.0</maven-plugin-api.version>
-        <maven-plugin-annotations.version>3.2</maven-plugin-annotations.version>
-        <plexus-utils.version>3.0.1</plexus-utils.version>
-        <maven-core.version>3.1.0</maven-core.version>
-        <maven-plugin-plugin.version>3.2</maven-plugin-plugin.version>
-        <servlet.version>6.0.37</servlet.version>
-        <reflection.version>0.9.9-RC1</reflection.version>
-        <jsr311-api.version>1.1.1</jsr311-api.version>
-        <jackson-jaxrs.version>1.9.12</jackson-jaxrs.version>
-        <spring.version>3.0.5.RELEASE</spring.version>
-        <gentyref.version>1.1.0</gentyref.version>
-        <plexus-spring.version>1.2</plexus-spring.version>
-        <assertj-core.version>1.2.0</assertj-core.version>
-        <junit.version>4.10</junit.version>
-        <masterdoc-entity.version>1.0</masterdoc-entity.version>
-        <handlebars-version>1.1.2</handlebars-version>
-        <sonatypeOssDistMgmtSnapshotsUrl>https://oss.sonatype.org/content/repositories/snapshots/
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.sonatype.oss</groupId>
+    <artifactId>oss-parent</artifactId>
+    <version>7</version>
+  </parent>
+  <groupId>fr.masterdocs</groupId>
+  <artifactId>masterdoc-maven-plugin</artifactId>
+  <version>2.1.1-SNAPSHOT</version>
+  <packaging>maven-plugin</packaging>
+  <developers>
+    <developer>
+      <id>pleresteux</id>
+      <name>Pierre LERESTEUX</name>
+      <email>pierre.leresteux@gmail.com</email>
+      <url>https://github.com/pierreLeresteux</url>
+    </developer>
+  </developers>
+  <name>Masterdocs maven plugin</name>
+  <description>Generate the REST documentation of a JAX-RS Application</description>
+  <scm>
+    <url>https://github.com/Masterdocs/masterdoc-maven-plugin</url>
+    <connection>scm:git:git@github.com:Masterdocs/masterdoc-maven-plugin.git</connection>
+    <developerConnection>scm:git:git@github.com:Masterdocs/masterdoc-maven-plugin.git</developerConnection>
+  </scm>
+  <properties>
+    <maven-plugin-api.version>3.1.0</maven-plugin-api.version>
+    <maven-plugin-annotations.version>3.2</maven-plugin-annotations.version>
+    <plexus-utils.version>3.0.1</plexus-utils.version>
+    <maven-core.version>3.1.0</maven-core.version>
+    <maven-plugin-plugin.version>3.2</maven-plugin-plugin.version>
+    <servlet.version>6.0.37</servlet.version>
+    <reflection.version>0.9.9-RC1</reflection.version>
+    <jsr311-api.version>1.1.1</jsr311-api.version>
+    <jackson-jaxrs.version>1.9.12</jackson-jaxrs.version>
+    <spring.version>3.0.5.RELEASE</spring.version>
+    <gentyref.version>1.1.0</gentyref.version>
+    <plexus-spring.version>1.2</plexus-spring.version>
+    <assertj-core.version>1.2.0</assertj-core.version>
+    <junit.version>4.10</junit.version>
+    <masterdoc-entity.version>1.0</masterdoc-entity.version>
+    <handlebars-version>1.1.2</handlebars-version>
+    <sonatypeOssDistMgmtSnapshotsUrl>https://oss.sonatype.org/content/repositories/snapshots/
         </sonatypeOssDistMgmtSnapshotsUrl>
-        <slf4j.version>1.6.6</slf4j.version>
-        <httpclient.version>4.2.2</httpclient.version>
-    </properties>
-
-    <dependencies>
-
-        <!-- MAVEN PLUGIN GENERATION -->
-        <dependency>
-            <groupId>org.apache.maven</groupId>
-            <artifactId>maven-plugin-api</artifactId>
-            <version>${maven-plugin-api.version}</version>
-        </dependency>
-        <!-- dependencies to annotations -->
-        <dependency>
-            <groupId>org.apache.maven.plugin-tools</groupId>
-            <artifactId>maven-plugin-annotations</artifactId>
-            <version>${maven-plugin-annotations.version}</version>
-            <!-- annotations are not needed for plugin execution so you can remove
+    <slf4j.version>1.6.6</slf4j.version>
+    <httpclient.version>4.2.2</httpclient.version>
+  </properties>
+  <dependencies>
+    <!-- MAVEN PLUGIN GENERATION -->
+    <dependency>
+      <groupId>org.apache.maven</groupId>
+      <artifactId>maven-plugin-api</artifactId>
+      <version>${maven-plugin-api.version}</version>
+    </dependency>
+    <!-- dependencies to annotations -->
+    <dependency>
+      <groupId>org.apache.maven.plugin-tools</groupId>
+      <artifactId>maven-plugin-annotations</artifactId>
+      <version>${maven-plugin-annotations.version}</version>
+      <!-- annotations are not needed for plugin execution so you can remove
                 this dependency for execution with using provided scope -->
-            <scope>provided</scope>
-        </dependency>
-        <!-- generated help mojo has a dependency to plexus-utils -->
-        <dependency>
-            <groupId>org.codehaus.plexus</groupId>
-            <artifactId>plexus-utils</artifactId>
-            <version>${plexus-utils.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.maven</groupId>
-            <artifactId>maven-core</artifactId>
-            <version>${maven-core.version}</version>
-        </dependency>
-
-
-        <!-- MASTERDOC -->
-
-        <dependency>
-            <groupId>org.codehaus.jackson</groupId>
-            <artifactId>jackson-jaxrs</artifactId>
-            <version>${jackson-jaxrs.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.reflections</groupId>
-            <artifactId>reflections</artifactId>
-            <version>${reflection.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.googlecode.gentyref</groupId>
-            <artifactId>gentyref</artifactId>
-            <version>${gentyref.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-context</artifactId>
-            <version>${spring.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.codehaus.plexus</groupId>
-            <artifactId>plexus-spring</artifactId>
-            <version>${plexus-spring.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>fr.masterdocs</groupId>
-            <artifactId>masterdoc-entity</artifactId>
-            <version>${masterdoc-entity.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.github.jknack</groupId>
-            <artifactId>handlebars</artifactId>
-            <version>${handlebars-version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-            <version>${slf4j.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpclient</artifactId>
-            <version>${httpclient.version}</version>
-        </dependency>
-        <!-- TEST -->
-        <dependency>
-            <groupId>org.assertj</groupId>
-            <artifactId>assertj-core</artifactId>
-            <version>${assertj-core.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>${junit.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.codehaus.jettison</groupId>
-            <artifactId>jettison</artifactId>
-            <version>1.3.4</version>
-        </dependency>
-
-    </dependencies>
-
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-plugin-plugin</artifactId>
-                <version>${maven-plugin-plugin.version}</version>
-                <configuration>
-                    <!-- see http://jira.codehaus.org/browse/MNG-5346 -->
-                    <skipErrorNoDescriptorsFound>true</skipErrorNoDescriptorsFound>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>mojo-descriptor</id>
-                        <goals>
-                            <goal>descriptor</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-release-plugin</artifactId>
-                <version>2.1</version>
-            </plugin>
-        </plugins>
-    </build>
+      <scope>provided</scope>
+    </dependency>
+    <!-- generated help mojo has a dependency to plexus-utils -->
+    <dependency>
+      <groupId>org.codehaus.plexus</groupId>
+      <artifactId>plexus-utils</artifactId>
+      <version>${plexus-utils.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.maven</groupId>
+      <artifactId>maven-core</artifactId>
+      <version>${maven-core.version}</version>
+    </dependency>
+    <!-- MASTERDOC -->
+    <dependency>
+      <groupId>org.codehaus.jackson</groupId>
+      <artifactId>jackson-jaxrs</artifactId>
+      <version>${jackson-jaxrs.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.reflections</groupId>
+      <artifactId>reflections</artifactId>
+      <version>${reflection.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.googlecode.gentyref</groupId>
+      <artifactId>gentyref</artifactId>
+      <version>${gentyref.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-context</artifactId>
+      <version>${spring.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.codehaus.plexus</groupId>
+      <artifactId>plexus-spring</artifactId>
+      <version>${plexus-spring.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>fr.masterdocs</groupId>
+      <artifactId>masterdoc-entity</artifactId>
+      <version>${masterdoc-entity.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.github.jknack</groupId>
+      <artifactId>handlebars</artifactId>
+      <version>${handlebars-version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+      <version>${slf4j.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.httpcomponents</groupId>
+      <artifactId>httpclient</artifactId>
+      <version>${httpclient.version}</version>
+    </dependency>
+    <!-- TEST -->
+    <dependency>
+      <groupId>org.assertj</groupId>
+      <artifactId>assertj-core</artifactId>
+      <version>${assertj-core.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>${junit.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.codehaus.jettison</groupId>
+      <artifactId>jettison</artifactId>
+      <version>1.3.4</version>
+    </dependency>
+  </dependencies>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-plugin-plugin</artifactId>
+        <version>${maven-plugin-plugin.version}</version>
+        <configuration>
+          <!-- see http://jira.codehaus.org/browse/MNG-5346 -->
+          <skipErrorNoDescriptorsFound>true</skipErrorNoDescriptorsFound>
+        </configuration>
+        <executions>
+          <execution>
+            <id>mojo-descriptor</id>
+            <goals>
+              <goal>descriptor</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-release-plugin</artifactId>
+        <version>2.1</version>
+      </plugin>
+    </plugins>
+  </build>
 </project>
