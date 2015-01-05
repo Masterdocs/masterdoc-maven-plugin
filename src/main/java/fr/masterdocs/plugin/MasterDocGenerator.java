@@ -839,6 +839,13 @@ public class MasterDocGenerator {
             }
         });
 
+        handlebars.registerHelper("replaceDot", new Helper<String>() {
+            @Override
+            public CharSequence apply(String context, Options options) throws IOException {
+                return context.replaceAll("\\.", "");
+            }
+        });
+
         handlebars.registerHelper("generateResID", new Helper<Resource>() {
             @Override
             public CharSequence apply(Resource context, Options options) throws IOException {
