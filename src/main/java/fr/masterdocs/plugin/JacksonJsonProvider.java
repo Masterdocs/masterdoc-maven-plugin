@@ -8,15 +8,15 @@ import org.codehaus.jackson.map.annotate.JsonSerialize.Inclusion;
 
 public class JacksonJsonProvider extends JacksonJaxbJsonProvider {
 
-	public JacksonJsonProvider() {
-		super();
-		configure(Feature.FAIL_ON_EMPTY_BEANS, false);
-		configure(DeserializationConfig.Feature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-		this._mapperConfig.getConfiguredMapper().getSerializationConfig().withSerializationInclusion(Inclusion.NON_NULL);
-	}
+    public JacksonJsonProvider() {
+        super();
+        configure(Feature.FAIL_ON_EMPTY_BEANS, false);
+        configure(DeserializationConfig.Feature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        this._mapperConfig.getConfiguredMapper().getSerializationConfig().withSerializationInclusion(Inclusion.NON_NULL);
+    }
 
-	public ObjectMapper getObjectMapper() {
-		return this._mapperConfig.getConfiguredMapper();
-	}
+    public ObjectMapper getObjectMapper() {
+        return this._mapperConfig.getConfiguredMapper();
+    }
 
 }

@@ -116,9 +116,9 @@ public class MasterDocGenerator {
     }
 
     public MasterDocGenerator(MavenProject project, String pathToGenerateFile, String[] packageDocumentationResources, boolean generateHTMLSite, Integer maxDepth)
-            throws SecurityException,
-            NoSuchFieldException,
-            IllegalArgumentException, IllegalAccessException {
+    throws SecurityException,
+    NoSuchFieldException,
+    IllegalArgumentException, IllegalAccessException {
         long start = System.currentTimeMillis();
         consoleLogger.info("MasterDocGenerator started");
         resources = new ArrayList<Resource>();
@@ -180,7 +180,7 @@ public class MasterDocGenerator {
         String packageDocumentationResource = args[0];
 
         if (null != packageDocumentationResource
-                && packageDocumentationResource.length() > 0) {
+        && packageDocumentationResource.length() > 0) {
             try {
                 getMetadata();
                 getDocResource(packageDocumentationResource);
@@ -200,11 +200,11 @@ public class MasterDocGenerator {
     // Private methods
     // ----------------------------------------------------------------------
     private void getEntities(Set list) throws ClassNotFoundException,
-            IntrospectionException {
+    IntrospectionException {
 
         newEntities = new HashSet<String>();
         for (Iterator<Serializable> iterator = list.iterator(); iterator
-                .hasNext(); ) {
+        .hasNext(); ) {
             Serializable entity = iterator.next();
             final Class<?> entityClass;
             String entityToString = entity.toString();
@@ -269,10 +269,10 @@ public class MasterDocGenerator {
 
         Reflections reflections = new Reflections(packageDocumentationResource);
         Set<Class<?>> reflectionResources = reflections
-                .getTypesAnnotatedWith(Path.class);
+        .getTypesAnnotatedWith(Path.class);
         consoleLogger.info(format("Resources : {0}", reflectionResources));
         for (Iterator<Class<?>> iterator = reflectionResources.iterator(); iterator
-                .hasNext(); ) {
+        .hasNext(); ) {
             Class<?> resource = iterator.next();
             if (!resource.isInterface()) {
                 Resource res = new Resource();
@@ -302,15 +302,15 @@ public class MasterDocGenerator {
                 // Check methods
                 Class<?> superclass = resource.getSuperclass();
                 if (null != superclass
-                        && !superclass.getCanonicalName().equals(
-                        JAVA_LANG_OBJECT)) {
+                && !superclass.getCanonicalName().equals(
+                JAVA_LANG_OBJECT)) {
                     Method[] superclassDeclaredMethods = superclass
-                            .getDeclaredMethods();
+                    .getDeclaredMethods();
                     for (int i = 0; i < superclassDeclaredMethods.length; i++) {
                         Method superclassDeclaredMethod = superclassDeclaredMethods[i];
                         ResourceEntry resourceEntry = createResourceEntryFromMethod(
-                                superclassDeclaredMethod, mediaTypeConsumes,
-                                mediaTypeProduces, resource);
+                        superclassDeclaredMethod, mediaTypeConsumes,
+                        mediaTypeProduces, resource);
                         if (null != resourceEntry) {
                             String path = resourceEntry.getPath();
                             if (null != path && path.startsWith("/")) {
@@ -328,13 +328,13 @@ public class MasterDocGenerator {
                 for (int i = 0; i < declaredMethods.length; i++) {
                     Method declaredMethod = declaredMethods[i];
                     ResourceEntry resourceEntry = createResourceEntryFromMethod(
-                            declaredMethod, mediaTypeConsumes,
-                            mediaTypeProduces, resource);
+                    declaredMethod, mediaTypeConsumes,
+                    mediaTypeProduces, resource);
                     if (null != resourceEntry) {
                         if (res.getEntryList().containsKey(
-                                resourceEntry.calculateUniqKey())) {
+                        resourceEntry.calculateUniqKey())) {
                             res.getEntryList().remove(
-                                    resourceEntry.calculateUniqKey());
+                            resourceEntry.calculateUniqKey());
                         }
                         String path = resourceEntry.getPath();
                         if (null != path && path.startsWith("/")) {
@@ -390,12 +390,12 @@ public class MasterDocGenerator {
      * @throws IntrospectionException
      */
     private Map<String, AbstractEntity> extractFields(Class<?> entityClass)
-            throws ClassNotFoundException, IntrospectionException {
+    throws ClassNotFoundException, IntrospectionException {
         Map<String, AbstractEntity> fields = new TreeMap<String, AbstractEntity>();
         consoleLogger.debug(format(">>Extract fields for class {0} ...", entityClass));
 
         final java.lang.reflect.Field[] declaredFields = entityClass
-                .getDeclaredFields();
+        .getDeclaredFields();
         for (int i = 0; i < declaredFields.length; i++) {
             java.lang.reflect.Field declaredField = declaredFields[i];
             final Annotation[] declaredAnnotations = declaredField.getDeclaredAnnotations();
@@ -417,8 +417,8 @@ public class MasterDocGenerator {
                 consoleLogger.debug(format(">>Extract fields  {0} ...", declaredField.getName()));
                 Type typeOfField = declaredField.getGenericType();
                 if (!typeOfField.toString().startsWith(CLASS) &&
-                        !typeOfField.toString().startsWith(INTERFACE) &&
-                        typeOfField.toString().indexOf(DOT) > -1) {
+                !typeOfField.toString().startsWith(INTERFACE) &&
+                typeOfField.toString().indexOf(DOT) > -1) {
                     typeOfField = (ParameterizedType) typeOfField;
                 }
                 String type = extractTypeFromType(typeOfField);
@@ -511,13 +511,13 @@ public class MasterDocGenerator {
      * @throws IntrospectionException
      */
     private Map<String, AbstractEntity> extractEnumFields(Serializable entity)
-            throws ClassNotFoundException, IntrospectionException {
+    throws ClassNotFoundException, IntrospectionException {
         Map<String, AbstractEntity> fields = new TreeMap<String, AbstractEntity>();
         List<String> values = new ArrayList<String>();
         String entityString = entity.toString();
         if (entityString.startsWith(CLASS)) {
             entityString = entityString.substring(entityString.indexOf(CLASS)
-                    + CLASS.length());
+            + CLASS.length());
         }
         consoleLogger.debug(">>>Extract enum " + entityString + " ...");
         final Class<?> entityClass = Class.forName(entityString, true, newClassLoader);
@@ -546,11 +546,11 @@ public class MasterDocGenerator {
                 Serializable requestEntity = resourceEntry.getRequestEntity();
                 Serializable responseEntity = resourceEntry.getResponseEntity();
                 if (null != requestEntity && !NULL.equals(requestEntity)
-                        && !VOID.equals(requestEntity)) {
+                && !VOID.equals(requestEntity)) {
                     entityList.add(removeList(requestEntity));
                 }
                 if (null != responseEntity && !NULL.equals(responseEntity)
-                        && !VOID.equals(responseEntity)) {
+                && !VOID.equals(responseEntity)) {
                     entityList.add(removeList(responseEntity));
                 }
             }
@@ -561,7 +561,7 @@ public class MasterDocGenerator {
         String string = String.valueOf(entity);
         if (string.indexOf("<") > 0) {
             string = string.substring(string.indexOf("<") + 1,
-                    string.length() - 1);
+            string.length() - 1);
         }
         return string;
     }
@@ -570,10 +570,10 @@ public class MasterDocGenerator {
                                                         String mediaTypeConsumes, String mediaTypeProduces,
                                                         Class childResourceClass) {
         ResourceEntry resourceEntry = new ResourceEntry(mediaTypeConsumes,
-                mediaTypeProduces);
+        mediaTypeProduces);
         resourceEntry.setPath("/");
         Annotation[] declaredAnnotations = declaredMethod
-                .getDeclaredAnnotations();
+        .getDeclaredAnnotations();
         for (int i = 0; i < declaredAnnotations.length; i++) {
             Annotation declaredAnnotation = declaredAnnotations[i];
             if (declaredAnnotation instanceof Path) {
@@ -585,13 +585,13 @@ public class MasterDocGenerator {
             }
             if (declaredAnnotation instanceof Produces) {
                 resourceEntry
-                        .setMediaTypeProduces(((Produces) declaredAnnotation)
-                                .value()[0]);
+                .setMediaTypeProduces(((Produces) declaredAnnotation)
+                .value()[0]);
             }
             if (declaredAnnotation instanceof Consumes) {
                 resourceEntry
-                        .setMediaTypeConsumes(((Consumes) declaredAnnotation)
-                                .value()[0]);
+                .setMediaTypeConsumes(((Consumes) declaredAnnotation)
+                .value()[0]);
             }
             if (declaredAnnotation instanceof GET) {
                 resourceEntry.setVerb(GET);
@@ -617,7 +617,7 @@ public class MasterDocGenerator {
         Object[] pType;
         if (null != childResourceClass) {
             pType = GenericTypeReflector.getExactParameterTypes(declaredMethod,
-                    childResourceClass);
+            childResourceClass);
         } else {
             pType = declaredMethod.getParameterTypes();
         }
@@ -680,12 +680,12 @@ public class MasterDocGenerator {
 
         if (null != childResourceClass) {
             Type exactReturnType = GenericTypeReflector.getExactReturnType(
-                    declaredMethod, childResourceClass);
+            declaredMethod, childResourceClass);
             resourceEntry
-                    .setResponseEntity(extractTypeFromType(exactReturnType));
+            .setResponseEntity(extractTypeFromType(exactReturnType));
         } else {
             resourceEntry.setResponseEntity(extractTypeFromType(declaredMethod
-                    .getGenericReturnType()));
+            .getGenericReturnType()));
         }
 
         resourceEntry.setMethodName(declaredMethod.getName());
@@ -718,7 +718,7 @@ public class MasterDocGenerator {
 
         // get all the dependencies which are hidden in resolvedArtifacts of project object
         Field dependencies = MavenProject.class.
-                getDeclaredField("resolvedArtifacts");
+        getDeclaredField("resolvedArtifacts");
 
         dependencies.setAccessible(true);
 
@@ -761,20 +761,20 @@ public class MasterDocGenerator {
         Ordering<AbstractEntity> nameOrdering = Ordering.natural().onResultOf(getNameFunction);
 
         ImmutableSortedSet<AbstractEntity> sortedEntities = ImmutableSortedSet.orderedBy(
-                nameOrdering).addAll(entities).build();
+        nameOrdering).addAll(entities).build();
         masterDoc.setEntities(sortedEntities.asList());
         Function<Resource, String> getPathFunction = new
 
-                Function<Resource, String>() {
-                    public String apply(Resource from) {
-                        return from.getRootPath();
-                    }
-                };
+        Function<Resource, String>() {
+            public String apply(Resource from) {
+                return from.getRootPath();
+            }
+        };
 
         Ordering<Resource> pathOrdering = Ordering.natural().onResultOf(getPathFunction);
 
         ImmutableSortedSet<Resource> sortedResources = ImmutableSortedSet.orderedBy(
-                pathOrdering).addAll(resources).build();
+        pathOrdering).addAll(resources).build();
         masterDoc.setResources(sortedResources.asList());
         masterDoc.setMetadata(metadata);
         consoleLogger.info(format("Generate files in {0} ...", pathToGenerateFile));
@@ -785,9 +785,9 @@ public class MasterDocGenerator {
         try {
             File fileEntities = new File(pathToGenerateFile + separator + MASTERDOC_JSON_FILENAME);
             BufferedWriter output = new BufferedWriter(new FileWriter(
-                    fileEntities));
+            fileEntities));
             output.write(mapper.defaultPrettyPrintingWriter()
-                    .writeValueAsString(masterDoc));
+            .writeValueAsString(masterDoc));
             output.close();
             if (generateHTMLSite) {
                 consoleLogger.debug("Start HTMLSite generation");
@@ -890,10 +890,10 @@ public class MasterDocGenerator {
             @Override
             public CharSequence apply(ResourceEntry context, Options options) throws IOException {
                 return new Handlebars.SafeString((context.getFullPath() + context.calculateUniqKey()).replaceAll("<<", "").replaceAll("/", "").replaceAll("}", "")
-                        .replaceAll("\\{", "")
-                        .replaceAll(":", "")
-                        .replaceAll("\\+", "")
-                        .replaceAll("\\{", "").replaceAll("\\\\", ""));
+                .replaceAll("\\{", "")
+                .replaceAll(":", "")
+                .replaceAll("\\+", "")
+                .replaceAll("\\{", "").replaceAll("\\\\", ""));
             }
         });
 
@@ -922,10 +922,10 @@ public class MasterDocGenerator {
                     JSONObject jso = new JSONObject();
                     JSONArray jsa = null;
                     if (context.startsWith(JAVA_UTIL_HASH_MAP) ||
-                            context.startsWith(JAVA_UTIL_MAP) ||
-                            context.startsWith(JAVA_UTIL_SET) ||
-                            context.startsWith(JAVA_UTIL_LIST) ||
-                            context.startsWith(JAVA_UTIL_COLLECTION)) {
+                    context.startsWith(JAVA_UTIL_MAP) ||
+                    context.startsWith(JAVA_UTIL_SET) ||
+                    context.startsWith(JAVA_UTIL_LIST) ||
+                    context.startsWith(JAVA_UTIL_COLLECTION)) {
                         jsa = new JSONArray();
                         final int beginIndex = context.indexOf("<") + 1;
                         final int finishIndex = context.indexOf(">");
@@ -967,10 +967,10 @@ public class MasterDocGenerator {
             public CharSequence apply(AbstractEntity context, Options options) throws IOException {
                 String name = context.getName();
                 if (name.startsWith(JAVA_UTIL_HASH_MAP) ||
-                        name.startsWith(JAVA_UTIL_MAP) ||
-                        name.startsWith(JAVA_UTIL_SET) ||
-                        name.startsWith(JAVA_UTIL_LIST) ||
-                        name.startsWith(JAVA_UTIL_COLLECTION)) {
+                name.startsWith(JAVA_UTIL_MAP) ||
+                name.startsWith(JAVA_UTIL_SET) ||
+                name.startsWith(JAVA_UTIL_LIST) ||
+                name.startsWith(JAVA_UTIL_COLLECTION)) {
 
                     final int beginIndex = name.indexOf("<") + 1;
                     final int finishIndex = name.indexOf(">");
@@ -998,10 +998,10 @@ public class MasterDocGenerator {
         JSONArray jsa = null;
         String name = entity.getName();
         if (name.startsWith(JAVA_UTIL_HASH_MAP) ||
-                name.startsWith(JAVA_UTIL_MAP) ||
-                name.startsWith(JAVA_UTIL_SET) ||
-                name.startsWith(JAVA_UTIL_LIST) ||
-                name.startsWith(JAVA_UTIL_COLLECTION)) {
+        name.startsWith(JAVA_UTIL_MAP) ||
+        name.startsWith(JAVA_UTIL_SET) ||
+        name.startsWith(JAVA_UTIL_LIST) ||
+        name.startsWith(JAVA_UTIL_COLLECTION)) {
             jsa = new JSONArray();
             final int beginIndex = name.indexOf("<") + 1;
             final int finishIndex = name.indexOf(">");
@@ -1095,7 +1095,7 @@ public class MasterDocGenerator {
     }
 
     private JSONObject enrichWithFields(JSONObject parent, Entity entity, TreeMap<String, Integer> depthObj)
-            throws JSONException {
+    throws JSONException {
         final Map<String, AbstractEntity> fields = entity.getFields();
         if (fields != null && fields.keySet() != null) {
             final Iterator<String> iterator = fields.keySet().iterator();
@@ -1129,9 +1129,9 @@ public class MasterDocGenerator {
 
     private CharSequence decorateURL(String context) {
         String url = context.replaceAll("\\{", "<span class=\"ink-label blue invert\">{")
-                .replaceAll("}", "}</span>")
-                .replaceAll("&", "</span>&<span class=\"ink-label green invert\">")
-                .replaceAll("\\?", "?<span class=\"ink-label green invert\">");
+        .replaceAll("}", "}</span>")
+        .replaceAll("&", "</span>&<span class=\"ink-label green invert\">")
+        .replaceAll("\\?", "?<span class=\"ink-label green invert\">");
         if (url.indexOf("?") > -1) {
             url = url + "</span>";
         }
