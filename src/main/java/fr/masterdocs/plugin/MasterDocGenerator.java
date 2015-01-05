@@ -155,15 +155,6 @@ public class MasterDocGenerator {
         }
     }
 
-    private static void copy(File file, OutputStream out) throws IOException {
-        InputStream in = new FileInputStream(file);
-        try {
-            copy(in, out);
-        } finally {
-            in.close();
-        }
-    }
-
     private static void copy(InputStream in, File file) throws IOException {
         OutputStream out = new FileOutputStream(file);
         try {
@@ -203,8 +194,7 @@ public class MasterDocGenerator {
     IntrospectionException {
 
         newEntities = new HashSet<String>();
-        for (Iterator<Serializable> iterator = list.iterator(); iterator
-        .hasNext(); ) {
+        for (Iterator<Serializable> iterator = list.iterator(); iterator.hasNext(); ) {
             Serializable entity = iterator.next();
             final Class<?> entityClass;
             String entityToString = entity.toString();
@@ -271,8 +261,7 @@ public class MasterDocGenerator {
         Set<Class<?>> reflectionResources = reflections
         .getTypesAnnotatedWith(Path.class);
         consoleLogger.info(format("Resources : {0}", reflectionResources));
-        for (Iterator<Class<?>> iterator = reflectionResources.iterator(); iterator
-        .hasNext(); ) {
+        for (Iterator<Class<?>> iterator = reflectionResources.iterator(); iterator.hasNext(); ) {
             Class<?> resource = iterator.next();
             if (!resource.isInterface()) {
                 Resource res = new Resource();
@@ -301,16 +290,11 @@ public class MasterDocGenerator {
 
                 // Check methods
                 Class<?> superclass = resource.getSuperclass();
-                if (null != superclass
-                && !superclass.getCanonicalName().equals(
-                JAVA_LANG_OBJECT)) {
-                    Method[] superclassDeclaredMethods = superclass
-                    .getDeclaredMethods();
+                if (null != superclass && !superclass.getCanonicalName().equals(JAVA_LANG_OBJECT)) {
+                    Method[] superclassDeclaredMethods = superclass.getDeclaredMethods();
                     for (int i = 0; i < superclassDeclaredMethods.length; i++) {
                         Method superclassDeclaredMethod = superclassDeclaredMethods[i];
-                        ResourceEntry resourceEntry = createResourceEntryFromMethod(
-                        superclassDeclaredMethod, mediaTypeConsumes,
-                        mediaTypeProduces, resource);
+                        ResourceEntry resourceEntry = createResourceEntryFromMethod(superclassDeclaredMethod, mediaTypeConsumes, mediaTypeProduces, resource);
                         if (null != resourceEntry) {
                             String path = resourceEntry.getPath();
                             if (null != path && path.startsWith("/")) {
@@ -394,8 +378,7 @@ public class MasterDocGenerator {
         Map<String, AbstractEntity> fields = new TreeMap<String, AbstractEntity>();
         consoleLogger.debug(format(">>Extract fields for class {0} ...", entityClass));
 
-        final java.lang.reflect.Field[] declaredFields = entityClass
-        .getDeclaredFields();
+        final java.lang.reflect.Field[] declaredFields = entityClass.getDeclaredFields();
         for (int i = 0; i < declaredFields.length; i++) {
             java.lang.reflect.Field declaredField = declaredFields[i];
             final Annotation[] declaredAnnotations = declaredField.getDeclaredAnnotations();
@@ -416,9 +399,7 @@ public class MasterDocGenerator {
             if (!bypass) {
                 consoleLogger.debug(format(">>Extract fields  {0} ...", declaredField.getName()));
                 Type typeOfField = declaredField.getGenericType();
-                if (!typeOfField.toString().startsWith(CLASS) &&
-                !typeOfField.toString().startsWith(INTERFACE) &&
-                typeOfField.toString().indexOf(DOT) > -1) {
+                if (!typeOfField.toString().startsWith(CLASS) && !typeOfField.toString().startsWith(INTERFACE) && typeOfField.toString().indexOf(DOT) > -1) {
                     typeOfField = (ParameterizedType) typeOfField;
                 }
                 String type = extractTypeFromType(typeOfField);
@@ -516,13 +497,11 @@ public class MasterDocGenerator {
         List<String> values = new ArrayList<String>();
         String entityString = entity.toString();
         if (entityString.startsWith(CLASS)) {
-            entityString = entityString.substring(entityString.indexOf(CLASS)
-            + CLASS.length());
+            entityString = entityString.substring(entityString.indexOf(CLASS) + CLASS.length());
         }
         consoleLogger.debug(">>>Extract enum " + entityString + " ...");
         final Class<?> entityClass = Class.forName(entityString, true, newClassLoader);
         final Object[] declaredEnumConstants = entityClass.getFields();
-        // final Object[] declaredEnumConstants = entityClass.getEnumConstants();
         Enumeration newEnumeration = new Enumeration();
         newEnumeration.setName(entityString.replaceAll("\\$", "."));
         for (int i = 0; i < declaredEnumConstants.length; i++) {
@@ -545,12 +524,10 @@ public class MasterDocGenerator {
             for (ResourceEntry resourceEntry : resourceEntries) {
                 Serializable requestEntity = resourceEntry.getRequestEntity();
                 Serializable responseEntity = resourceEntry.getResponseEntity();
-                if (null != requestEntity && !NULL.equals(requestEntity)
-                && !VOID.equals(requestEntity)) {
+                if (null != requestEntity && !NULL.equals(requestEntity) && !VOID.equals(requestEntity)) {
                     entityList.add(removeList(requestEntity));
                 }
-                if (null != responseEntity && !NULL.equals(responseEntity)
-                && !VOID.equals(responseEntity)) {
+                if (null != responseEntity && !NULL.equals(responseEntity) && !VOID.equals(responseEntity)) {
                     entityList.add(removeList(responseEntity));
                 }
             }
@@ -572,8 +549,7 @@ public class MasterDocGenerator {
         ResourceEntry resourceEntry = new ResourceEntry(mediaTypeConsumes,
         mediaTypeProduces);
         resourceEntry.setPath("/");
-        Annotation[] declaredAnnotations = declaredMethod
-        .getDeclaredAnnotations();
+        Annotation[] declaredAnnotations = declaredMethod.getDeclaredAnnotations();
         for (int i = 0; i < declaredAnnotations.length; i++) {
             Annotation declaredAnnotation = declaredAnnotations[i];
             if (declaredAnnotation instanceof Path) {
@@ -754,14 +730,13 @@ public class MasterDocGenerator {
         MasterDoc masterDoc = new MasterDoc();
         Function<AbstractEntity, String> getNameFunction = new Function<AbstractEntity, String>() {
             public String apply(AbstractEntity from) {
-                return extractName(from.getName());
+                return extractName(from.getName()) + from.getName();
             }
         };
 
         Ordering<AbstractEntity> nameOrdering = Ordering.natural().onResultOf(getNameFunction);
 
-        ImmutableSortedSet<AbstractEntity> sortedEntities = ImmutableSortedSet.orderedBy(
-        nameOrdering).addAll(entities).build();
+        ImmutableSortedSet<AbstractEntity> sortedEntities = ImmutableSortedSet.orderedBy(nameOrdering).addAll(entities).build();
         masterDoc.setEntities(sortedEntities.asList());
         Function<Resource, String> getPathFunction = new
 
@@ -773,8 +748,7 @@ public class MasterDocGenerator {
 
         Ordering<Resource> pathOrdering = Ordering.natural().onResultOf(getPathFunction);
 
-        ImmutableSortedSet<Resource> sortedResources = ImmutableSortedSet.orderedBy(
-        pathOrdering).addAll(resources).build();
+        ImmutableSortedSet<Resource> sortedResources = ImmutableSortedSet.orderedBy(pathOrdering).addAll(resources).build();
         masterDoc.setResources(sortedResources.asList());
         masterDoc.setMetadata(metadata);
         consoleLogger.info(format("Generate files in {0} ...", pathToGenerateFile));
