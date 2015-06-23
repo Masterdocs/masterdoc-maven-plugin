@@ -218,7 +218,7 @@ public class MasterDocGenerator {
                 } else {
                     newEntity.setFields(extractFields(entityClass));
                     final Class<?> superclass = entityClass.getSuperclass();
-                    if (!JAVA_LANG_OBJECT.equals(superclass.getName())) {
+                    if (superclass != null && !JAVA_LANG_OBJECT.equals(superclass.getName())) {
                         newEntity.setSuperClass(superclass.getName());
                         if (!entityList.contains(superclass.getName()) && !newEntities.contains(superclass.getName())) {
                             newEntities.add(superclass.getName());
