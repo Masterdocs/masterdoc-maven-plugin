@@ -224,6 +224,27 @@ public class MasterDocGenerator {
                             newEntities.add(superclass.getName());
                         }
                     }
+                    if (superclass == null) {
+                        final Annotation[] annotations = entityClass.getAnnotations();
+                        if (annotations != null) {
+                            for (int i = 0; i < annotations.length; i++) {
+                                Annotation annotation = annotations[i];
+                                if (annotation.toString().contains("JsonSubTypes")) {
+                                    newEntity.setSubType(new ArrayList<String>());
+                                    final com.fasterxml.jackson.annotation.JsonSubTypes.Type[] value = ((com.fasterxml.jackson.annotation.JsonSubTypes) annotation).value();
+                                    for (int j = 0; j < value.length; j++) {
+                                        com.fasterxml.jackson.annotation.JsonSubTypes.Type type = value[j];
+                                        String subType = type.value().toString();
+                                        if (subType.startsWith(CLASS)) {
+                                            subType = subType.substring(subType.indexOf(CLASS) + CLASS.length());
+                                        }
+                                        newEntities.add(subType);
+                                        newEntity.getSubType().add(subType);
+                                    }
+                                }
+                            }
+                        }
+                    }
                     if (newEntity.getFields().isEmpty()) {
                         newEntity.setFields(null);
                     }
